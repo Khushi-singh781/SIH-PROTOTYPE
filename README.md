@@ -1,4 +1,3 @@
-Absolutely. Below is a **complete, GitHub-ready `README.md`** based on your architecture. I’ve kept **Qwen + Mistral + Llama mandatory**, and added **Markdown tables, Mermaid diagrams, ASCII diagrams, API tables, architecture tables, workflow tables, and MVP/scalable comparisons** for easy understanding.
 
 ````markdown
 # Real-Time Crypto Fraud Attribution & Investigation Platform
