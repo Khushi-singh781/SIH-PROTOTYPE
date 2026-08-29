@@ -1,2572 +1,1066 @@
+Below is a production-grade README.md you can directly use for the project. It separates the target production architecture from the SIH MVP, while documenting the complete technical pipeline, components, data flow, LLM architecture, security, deployment, APIs, database design, and investigation workflow.
 
-````markdown
-# Real-Time Crypto Fraud Attribution & Investigation Platform
+Real-Time Crypto Fraud Attribution & Investigation Platform
 
-> An investigator-focused blockchain intelligence platform for tracing cryptocurrency fraud, identifying intermediary wallets and VASP associations, detecting suspicious transaction patterns, combining rule-based and ML risk signals, and generating evidence-grounded investigation reports using multiple specialized LLMs.
+An evidence-grounded, multi-chain cryptocurrency fraud investigation and intelligence platform for tracing funds, identifying intermediary wallets and VASP associations, detecting suspicious transaction patterns, combining deterministic rules with machine learning, and using multiple specialized LLMs to assist investigators.
 
----
+Table of Contents
+1. Project Overview
+2. Problem Statement
+3. Proposed Solution
+4. Core Objectives
+5. Key Capabilities
+6. End-to-End Investigation Pipeline
+7. Production Architecture
+8. Technology Stack
+9. Pipeline 1 — Case & Wallet Intake
+10. Pipeline 2 — Blockchain Data Collection
+11. Pipeline 3 — Data Normalization
+12. Pipeline 4 — Transaction Graph
+13. Pipeline 5 — Multi-Hop Fund Tracing
+14. Pipeline 6 — Suspicious Pattern Detection
+15. Pipeline 7 — VASP & Entity Intelligence
+16. Pipeline 8 — ML Risk Analysis
+17. Pipeline 9 — Rule Engine
+18. Pipeline 10 — Multi-LLM Intelligence
+19. Pipeline 11 — Evidence Correlation
+20. Pipeline 12 — Final Risk Engine
+21. Pipeline 13 — Investigator Dashboard
+22. Pipeline 14 — Real-Time Monitoring
+23. Cross-Chain Architecture
+24. Bridge Detection
+25. Database Architecture
+26. Evidence Architecture
+27. LLM Context Architecture
+28. LLM Output Schema
+29. API Architecture
+30. Security Architecture
+31. Production Deployment
+32. Observability & Reliability
+33. Repository Structure
+34. SIH MVP vs Production Architecture
+35. Development Roadmap
+36. Analytical Principles
+37. Example Investigation
+38. Expected Output
+39. Future Enhancements
+40. Project Philosophy
+41. License & Responsible Use
+1. Project Overview
 
-## Table of Contents
+The Real-Time Crypto Fraud Attribution & Investigation Platform is a production-oriented blockchain intelligence system designed to help investigators analyze cryptocurrency fraud cases.
 
-- [1. Overview](#1-overview)
-- [2. Problem Statement](#2-problem-statement)
-- [3. Objectives](#3-objectives)
-- [4. Key Features](#4-key-features)
-- [5. High-Level Architecture](#5-high-level-architecture)
-- [6. End-to-End Investigation Workflow](#6-end-to-end-investigation-workflow)
-- [7. Wallet Intake](#7-wallet-intake)
-- [8. Blockchain Data Collection](#8-blockchain-data-collection)
-- [9. Multi-Provider Blockchain Architecture](#9-multi-provider-blockchain-architecture)
-- [10. Data Normalization](#10-data-normalization)
-- [11. Transaction Graph](#11-transaction-graph)
-- [12. Multi-Hop Fund Tracing](#12-multi-hop-fund-tracing)
-- [13. Fund Flow Analysis](#13-fund-flow-analysis)
-- [14. Suspicious Pattern Detection](#14-suspicious-pattern-detection)
-- [15. VASP Identification](#15-vasp-identification)
-- [16. Exchange Wallet Clustering](#16-exchange-wallet-clustering)
-- [17. Machine Learning Layer](#17-machine-learning-layer)
-- [18. Rule Engine](#18-rule-engine)
-- [19. Mandatory Multi-LLM Architecture](#19-mandatory-multi-llm-architecture)
-- [20. Specialized LLM Roles](#20-specialized-llm-roles)
-- [21. Multi-LLM Consensus](#21-multi-llm-consensus)
-- [22. LLM Guardrails](#22-llm-guardrails)
-- [23. Evidence Correlation](#23-evidence-correlation)
-- [24. Final Risk Engine](#24-final-risk-engine)
-- [25. Investigative Recommendations](#25-investigative-recommendations)
-- [26. Case Management](#26-case-management)
-- [27. Investigator Dashboard](#27-investigator-dashboard)
-- [28. Real-Time Monitoring](#28-real-time-monitoring)
-- [29. Cross-Chain Architecture](#29-cross-chain-architecture)
-- [30. Bridge Detection](#30-bridge-detection)
-- [31. API Architecture](#31-api-architecture)
-- [32. Database Architecture](#32-database-architecture)
-- [33. Evidence Data Model](#33-evidence-data-model)
-- [34. LLM Context Pipeline](#34-llm-context-pipeline)
-- [35. LLM Output Schema](#35-llm-output-schema)
-- [36. Report Generation](#36-report-generation)
-- [37. Complete Data Flow](#37-complete-data-flow)
-- [38. Security and Reliability](#38-security-and-reliability)
-- [39. Repository Structure](#39-repository-structure)
-- [40. Two-Day SIH MVP](#40-two-day-sih-mvp)
-- [41. MVP vs Scalable Architecture](#41-mvp-vs-scalable-architecture)
-- [42. Why Multiple LLMs](#42-why-multiple-llms)
-- [43. What Makes the Platform Different](#43-what-makes-the-platform-different)
-- [44. Analytical Principles](#44-analytical-principles)
-- [45. Technology Stack](#45-technology-stack)
-- [46. Expected Outcome](#46-expected-outcome)
-- [47. Future Enhancements](#47-future-enhancements)
+The platform starts with a wallet reported in a complaint and progressively converts raw blockchain activity into structured investigative intelligence.
 
----
+The central question is:
 
-# 1. Overview
+Where did the victim's funds go, which wallets were involved, what suspicious behaviors occurred, did the funds interact with a known or inferred VASP, what evidence supports the findings, and what should the investigator examine next?
 
-The **Real-Time Crypto Fraud Attribution & Investigation Platform** is an investigator-focused intelligence system designed to trace cryptocurrency funds from a victim-reported wallet, reconstruct the movement of funds across multiple transaction hops, identify intermediary wallets and exchange/VASP associations, detect suspicious transaction patterns, calculate explainable risk scores, and generate standardized investigation reports.
+The platform is designed to be more than a blockchain explorer.
 
-The platform is designed around one central investigative question:
-
-> **A victim reported this wallet. Where did the money go, which intermediary wallets were involved, did it reach a VASP, what suspicious patterns occurred, what evidence supports the findings, and what should the investigator examine next?**
-
-The system is intentionally more than a blockchain explorer.
-
-A conventional blockchain explorer primarily answers:
-
-```text
+Blockchain Explorer
 "What transactions happened?"
-````
 
-This platform attempts to answer:
-
-```text
-"Where did the victim's funds move?
+Investigation Intelligence Platform
+"Where did the funds go?
  Which wallets were involved?
  What patterns occurred?
- Did funds reach a known or inferred VASP?
+ Did funds reach an exchange/VASP?
  What evidence supports the findings?
- How strong are the analytical signals?
+ How strong are the signals?
  What should the investigator examine next?"
-```
 
-The platform combines:
+2. Problem Statement
 
-* Blockchain intelligence
-* Multi-hop fund tracing
-* Transaction graph analytics
-* VASP/entity intelligence
-* Exchange wallet clustering
-* Rule-based detection
-* Machine learning
-* Graph analytics
-* Mandatory multi-LLM intelligence
-* Evidence correlation
-* Explainable risk scoring
-* Real-time monitoring
-* Investigator dashboards
-* Automated report generation
+Cryptocurrency fraud investigations can become difficult because stolen funds may:
 
----
+Move through multiple intermediary wallets.
+Split into many addresses.
+Consolidate into a single destination.
+Move within minutes.
+Interact with smart contracts.
+Reach exchange/VASP-associated wallets.
+Cross blockchain networks.
+Pass through bridges.
+Create large and complex transaction graphs.
 
-# 2. Problem Statement
+A manual investigation requires investigators to collect, correlate and interpret large quantities of blockchain information.
 
-Cryptocurrency fraud investigations can become difficult when stolen funds:
+The proposed system automates the repetitive analytical work while keeping the investigator responsible for final interpretation and decisions.
 
-* Move through multiple wallets.
-* Split into several addresses.
-* Are consolidated later.
-* Move rapidly between wallets.
-* Interact with exchange/VASP addresses.
-* Pass through bridge contracts.
-* Cross blockchain boundaries.
-* Use complex transaction patterns.
+3. Proposed Solution
 
-A manual investigation may require investigators to:
+The platform creates an end-to-end investigation pipeline:
 
-| Investigation Task               | Manual Difficulty |
-| -------------------------------- | ----------------- |
-| Collect blockchain data          | High              |
-| Follow multiple transaction hops | High              |
-| Identify intermediary wallets    | High              |
-| Detect suspicious patterns       | High              |
-| Identify VASP relationships      | High              |
-| Correlate evidence               | Very High         |
-| Calculate risk                   | High              |
-| Preserve evidence                | High              |
-| Prepare reports                  | Very High         |
+Victim Complaint
+       |
+       v
+Wallet Intake
+       |
+       v
+Case Creation
+       |
+       v
+Blockchain Data Collection
+       |
+       v
+Data Normalization
+       |
+       v
+Transaction Graph
+       |
+       v
+Multi-Hop Fund Tracing
+       |
+       v
+Suspicious Pattern Detection
+       |
+       v
+VASP / Entity Intelligence
+       |
+       v
+Rules + Machine Learning
+       |
+       v
+Multi-LLM Intelligence
+       |
+       v
+Evidence Correlation
+       |
+       v
+Explainable Risk Engine
+       |
+       v
+Investigator Dashboard
+       |
+       +----------------+
+       |                |
+       v                v
+Recommendations      PDF Report
 
-The proposed platform automates and assists this workflow while keeping the final investigative decision with the human investigator.
 
----
+The production architecture is designed to support:
 
-# 3. Objectives
+Multi-chain analysis.
+Multiple blockchain data providers.
+Persistent graph storage.
+ML and graph analytics.
+Real-time monitoring.
+Evidence provenance.
+Multi-model LLM analysis.
+Human-in-the-loop investigation.
+Scalable deployment.
+4. Core Objectives
 
 The platform aims to:
 
-1. Accept a victim-reported cryptocurrency wallet.
-2. Validate the wallet and create an investigation case.
-3. Retrieve blockchain transactions using multiple providers.
-4. Normalize heterogeneous blockchain data.
-5. Construct a transaction graph.
-6. Perform configurable multi-hop fund tracing.
-7. Analyze inflows, outflows and counterparties.
-8. Detect suspicious transaction patterns.
-9. Detect bridge and cross-chain interactions where supported.
-10. Identify known or likely exchange/VASP associations.
-11. Cluster related exchange wallets where evidence supports the relationship.
-12. Extract behavioral features for ML analysis.
-13. Generate multiple independent ML signals.
-14. Apply deterministic explainable rules.
-15. Run multiple specialized LLMs as a mandatory intelligence layer.
-16. Cross-check LLM conclusions against structured evidence.
-17. Generate an explainable final risk assessment.
-18. Generate evidence-backed investigative recommendations.
-19. Monitor new transactions.
-20. Generate standardized investigation reports.
+Accept a victim-reported wallet.
+Create a structured investigation case.
+Collect blockchain transactions.
+Normalize heterogeneous blockchain data.
+Build a transaction graph.
+Trace funds across multiple hops.
+Detect suspicious transaction patterns.
+Identify known or inferred VASP/entity relationships.
+Generate deterministic risk factors.
+Generate ML-based risk signals.
+Perform graph-based analysis.
+Run Qwen as an investigation analyst.
+Run Mistral as an evidence reviewer.
+Run Llama as an investigator copilot.
+Validate AI conclusions against structured evidence.
+Produce explainable risk scores.
+Monitor new transactions.
+Generate investigative recommendations.
+Generate standardized evidence-backed reports.
+5. Key Capabilities
+Capability	Description
+Case Management	Create and manage investigation cases
+Wallet Intake	Accept and validate reported addresses
+Blockchain Intelligence	Retrieve transaction data
+Data Normalization	Convert multiple provider formats into one schema
+Transaction Graph	Represent wallets and transactions as a graph
+Multi-Hop Tracing	Follow funds across intermediary wallets
+Pattern Detection	Identify suspicious movement patterns
+VASP Intelligence	Identify known or inferred entity relationships
+Wallet Clustering	Group addresses associated with entities
+Rule Engine	Produce deterministic risk factors
+ML Engine	Generate statistical and predictive risk signals
+Graph Analytics	Analyze transaction relationships
+Multi-LLM	Qwen + Mistral + Llama
+Evidence Correlation	Connect findings to evidence
+Risk Engine	Produce explainable final risk
+Monitoring	Detect new activity
+Dashboard	Provide investigator workspace
+Reporting	Generate PDF investigation reports
+6. End-to-End Investigation Pipeline
+6.1 High-Level Pipeline
+Victim Complaint
+Wallet Address
+Case Creation
+Blockchain Data Collection
+Data Normalization
+Transaction Graph
+Multi-Hop Fund Tracing
+Suspicious Pattern Detection
+VASP / Entity Intelligence
+Feature Engineering
+ML Analysis
+Rule Engine
+Evidence Package
+Multi-LLM Layer
+Evidence Correlation
+Final Risk Engine
+Investigator Dashboard
+Recommendations
+PDF Report
+7. Production Architecture
+flowchart TB
 
----
+    USER[Investigator]
 
-# 4. Key Features
+    USER --> FRONTEND
 
-| Feature              | Description                                                  |
-| -------------------- | ------------------------------------------------------------ |
-| Wallet Intake        | Create investigations from reported wallet addresses         |
-| Multi-Provider Data  | Retrieve data from multiple blockchain sources               |
-| Data Normalization   | Convert provider-specific responses into a common schema     |
-| Multi-Hop Tracing    | Follow funds across configurable transaction hops            |
-| Graph Analytics      | Represent wallets and transactions as a directed graph       |
-| Fund Flow Analysis   | Analyze inflows, outflows, counterparties and timing         |
-| Pattern Detection    | Detect rapid movement, layering, splitting and consolidation |
-| VASP Intelligence    | Identify known or inferred exchange/VASP relationships       |
-| Wallet Clustering    | Group addresses associated with an entity                    |
-| ML Analysis          | Generate supervised and anomaly-based risk signals           |
-| Rule Engine          | Produce deterministic and explainable risk factors           |
-| Multi-LLM            | Qwen + Mistral + Llama as mandatory specialized models       |
-| Evidence Review      | Validate claims against structured evidence                  |
-| Risk Engine          | Combine rule, ML and graph signals                           |
-| Real-Time Monitoring | Detect new transactions and trigger alerts                   |
-| Cross-Chain Ready    | Support normalized multi-chain transaction data              |
-| Report Generation    | Generate evidence-backed PDF reports                         |
-| Case Management      | Maintain investigations, evidence and analysis history       |
+    subgraph FRONTEND["Frontend Layer"]
+        FRONTEND[React]
+        UI[Tailwind CSS]
+        GRAPH[Cytoscape.js]
+        CHARTS[Recharts]
+    end
 
----
+    FRONTEND --> API
 
-# 5. High-Level Architecture
+    subgraph API_LAYER["API Layer"]
+        API[FastAPI]
+        AUTH[Authentication / RBAC]
+        VALIDATION[Pydantic]
+    end
 
-```text
-                         VICTIM / COMPLAINT
-                                |
-                                v
-                       INVESTIGATOR INPUT
-                                |
-                                v
-                     +----------------------+
-                     |      API GATEWAY     |
-                     |       FastAPI        |
-                     +----------+-----------+
-                                |
-                                v
-                    +-----------------------+
-                    |   CASE MANAGEMENT      |
-                    | PostgreSQL + Pydantic  |
-                    +-----------+------------+
-                                |
-                                v
-                    +-----------------------+
-                    | BLOCKCHAIN DATA LAYER |
-                    +-----------+------------+
-                                |
-          +---------------------+----------------------+
-          |                     |                      |
-          v                     v                      v
-     Blockscout             Etherscan               Web3.py
-          |                     |                      |
-          +---------------------+----------------------+
-                                |
-                                v
-                    +-----------------------+
-                    | DATA NORMALIZATION     |
-                    | Pandas + NumPy         |
-                    +-----------+------------+
-                                |
-                 +--------------+--------------+
-                 |                             |
-                 v                             v
-        TRANSACTION ENGINE               GRAPH ENGINE
-                                          NetworkX + Neo4j
-                 |                             |
-                 v                             v
-          FEATURE ENGINEERING          GRAPH FEATURES / PATHS
-                 |
-        +--------+--------+
-        |                 |
-        v                 v
-     XGBoost        Isolation Forest
-        |                 |
-        +--------+--------+
-                 |
-                 v
-          +-------------------+
-          |    RULE ENGINE    |
-          +---------+---------+
-                    |
-                    v
-          +-------------------+
-          | ENTITY / VASP INTEL|
-          +---------+---------+
-                    |
-                    v
-          +-------------------+
-          | EVIDENCE PACKAGE  |
-          +---------+---------+
-                    |
-                    v
-          +-------------------+
-          |  MULTI-LLM LAYER  |
-          +---------+---------+
-                    |
-       +------------+------------+
-       |            |            |
-       v            v            v
-     Qwen        Mistral       Llama
-    Analyst      Reviewer      Copilot
-       |            |            |
-       +------------+------------+
-                    |
-                    v
-          CONSENSUS / CONFLICT
-               DETECTION
-                    |
-                    v
-          EVIDENCE CORRELATION
-                    |
-                    v
-             FINAL RISK ENGINE
-                    |
-          +---------+---------+
-          |                   |
-          v                   v
-   INVESTIGATOR UI         ALERTS
- React + Cytoscape.js
- Recharts + Tailwind
-          |
-          v
-      REPORT ENGINE
-          |
-          v
-        PDF
-```
+    API --> ORCHESTRATOR
 
----
+    subgraph CORE["Investigation Core"]
+        ORCHESTRATOR[Investigation Orchestrator]
+        CASE[Case Service]
+        TX[Transaction Service]
+        TRACE[Fund Tracing Service]
+        PATTERN[Pattern Detection]
+        ENTITY[Entity Intelligence]
+        RISK[Risk Engine]
+        EVIDENCE[Evidence Service]
+    end
 
-# 6. End-to-End Investigation Workflow
+    ORCHESTRATOR --> BLOCKCHAIN
+    ORCHESTRATOR --> GRAPH
+    ORCHESTRATOR --> ML
+    ORCHESTRATOR --> LLM
+    ORCHESTRATOR --> DATABASE
 
-```mermaid
-flowchart TD
+    subgraph BLOCKCHAIN["Blockchain Data Layer"]
+        WEB3[Web3.py]
+        BS[Blockscout]
+        ETH[Etherscan]
+        PROVIDERS[Additional Providers]
+    end
 
-    A[Victim Complaint] --> B[Wallet Intake]
-    B --> C[Create Investigation Case]
-    C --> D[Validate Wallet]
-    D --> E[Blockchain Data Collection]
+    subgraph GRAPH["Graph Layer"]
+        NX[NetworkX]
+        NEO[Neo4j]
+    end
 
-    E --> F[Blockscout]
-    E --> G[Etherscan]
-    E --> H[Web3.py]
+    subgraph ML["Machine Learning"]
+        XGB[XGBoost]
+        ISO[Isolation Forest]
+        GML[Graph ML]
+    end
 
-    F --> I[Data Normalization]
-    G --> I
-    H --> I
+    subgraph LLM["Multi-LLM Layer"]
+        ORCH[LLM Orchestrator]
+        QWEN[Qwen Analyst]
+        MISTRAL[Mistral Reviewer]
+        LLAMA[Llama Copilot]
+    end
 
-    I --> J[Transaction Engine]
-    J --> K[Graph Construction]
+    subgraph DATABASE["Persistence"]
+        PG[(PostgreSQL)]
+        OBJ[(Object Storage)]
+    end
 
-    K --> L[Multi-Hop Fund Tracing]
-    L --> M[Fund Flow Analysis]
+    API --> MONITORING
 
-    M --> N[Suspicious Pattern Detection]
-    N --> O[VASP / Entity Intelligence]
+    subgraph MONITORING["Monitoring"]
+        STREAM[Event / Polling Layer]
+        ALERT[Alert Engine]
+    end
 
-    O --> P[Feature Engineering]
-    P --> Q[Machine Learning]
-    Q --> R[Rule Engine]
+8. Technology Stack
+8.1 Complete Production Stack
+Layer	Technologies
+Frontend	React, Vite, Tailwind CSS
+Graph UI	Cytoscape.js
+Charts	Recharts
+Backend	Python, FastAPI
+Validation	Pydantic
+Blockchain	Web3.py
+Blockchain APIs	Blockscout, Etherscan, additional providers
+Data Processing	Pandas, NumPy
+Graph Analytics	NetworkX
+Graph Database	Neo4j
+Relational Database	PostgreSQL
+ML	scikit-learn, XGBoost
+Anomaly Detection	Isolation Forest
+Graph ML	PyTorch Geometric
+Entity Intelligence	OpenSanctions, FollowTheMoney, OpenAleph
+LLMs	Qwen, Mistral, Llama
+LLM Serving	Ollama / vLLM
+Reports	ReportLab / WeasyPrint
+Containerization	Docker
+CI/CD	GitHub Actions
+API Documentation	OpenAPI / Swagger
+Monitoring	Prometheus + Grafana
+Logging	Python logging / structured logs
+Cache	Redis
+Background Jobs	Celery / Redis
+Streaming	Kafka or equivalent event infrastructure
+Web Communication	WebSockets
+9. Pipeline 1 — Case & Wallet Intake
+Objective
 
-    R --> S[Evidence Package]
+Start an investigation using a wallet reported by the victim or investigator.
 
-    S --> T[Qwen Analyst]
-    S --> U[Mistral Evidence Reviewer]
-    S --> V[Llama Investigator Copilot]
+Complaint
+    |
+    v
+Wallet Address
+    |
+    v
+Validation
+    |
+    v
+Case Creation
 
-    T --> W[Consensus / Conflict Detection]
-    U --> W
-    V --> W
+Technologies
+React
+Vite
+Tailwind CSS
+FastAPI
+Pydantic
+PostgreSQL
+Web3.py
 
-    W --> X[Evidence Correlation]
-    X --> Y[Final Risk Engine]
-
-    Y --> Z[Investigator Dashboard]
-    Y --> AA[Real-Time Alerts]
-
-    Z --> AB[Investigative Recommendations]
-    Z --> AC[PDF Report]
-```
-
----
-
-# 7. Wallet Intake
-
-The investigator submits information such as:
-
-```text
-Wallet Address:
-0x7A23....91F2
-
-Blockchain:
-Ethereum
-
-Case ID:
-CYBER-2026-00142
-
-Amount:
-₹4,50,000
-
-Complaint Type:
-Investment Fraud
-```
-
-The system validates:
-
-* Wallet address format
-* Supported blockchain
-* Required case information
-* Duplicate case status
-* Previous investigation status
-
-### Example API
-
-```http
-POST /api/cases
-```
-
-### Request
-
-```json
+Example
 {
+  "case_id": "CYBER-2026-001",
   "wallet_address": "0xABC...",
   "blockchain": "ethereum",
-  "case_id": "CYBER-001",
   "fraud_type": "investment_fraud"
 }
-```
 
----
 
-# 8. Blockchain Data Collection
+The backend validates the input and creates the investigation record.
 
-After creating a case, the blockchain service retrieves transaction information.
+10. Pipeline 2 — Blockchain Data Collection
+Objective
 
-```text
-                    Wallet
-                       |
-                       v
-              Blockchain Service
-                       |
-        +--------------+--------------+
-        |              |              |
-        v              v              v
-   Blockscout      Etherscan       Web3.py
-        |              |              |
-        +--------------+--------------+
-                       |
-                       v
-                Transaction Data
-```
+Retrieve transaction activity related to the reported wallet.
 
-The platform can collect:
+Reported Wallet
+Blockchain Adapter
+Blockscout
+Etherscan
+Web3.py
+Additional Provider
+Raw Transaction Data
+Provider Reconciliation
+Data Collected
+Transaction Hash
+Sender
+Receiver
+Amount
+Token
+Timestamp
+Block Number
+Chain
+Status
+Gas
+Logs
+Provider
 
-| Field            | Purpose                           |
-| ---------------- | --------------------------------- |
-| Transaction Hash | Unique transaction identifier     |
-| Sender           | Source address                    |
-| Receiver         | Destination address               |
-| Native Amount    | Native cryptocurrency value       |
-| Token Amount     | Token transfer value              |
-| Token Symbol     | Token identification              |
-| Contract Address | Token/contract identification     |
-| Timestamp        | Transaction timing                |
-| Block Number     | Blockchain evidence               |
-| Status           | Success/failure                   |
-| Gas Information  | Transaction execution information |
-| Chain ID         | Blockchain identification         |
-| Logs/Events      | Token and contract activity       |
-| Provider         | Source provenance                 |
+Important Design Principle
 
-Example:
+Blockchain providers are treated as data sources, not as the core analytical engine.
 
-```text
-TX001
-Victim -> Wallet A
-₹50,000
+The application uses an adapter layer so providers can be replaced or added later.
 
-TX002
-Wallet A -> Wallet B
-₹48,500
+11. Pipeline 3 — Data Normalization
 
-TX003
-Wallet B -> Wallet C
-₹47,900
+Different blockchain providers expose different response structures.
 
-TX004
-Wallet C -> Exchange X
-₹47,500
-```
+The normalization layer converts them into a common schema.
 
-The original provider/source is retained to preserve data provenance.
-
----
-
-# 9. Multi-Provider Blockchain Architecture
-
-The platform should not depend on a single blockchain API.
-
-```mermaid
-flowchart LR
-
-    A[Blockchain Adapter Layer]
-
-    A --> B[Blockscout]
-    A --> C[Etherscan]
-    A --> D[Web3.py]
-
-    B --> E[Common Transaction Model]
-    C --> E
-    D --> E
-
-    E --> F[Transaction Engine]
-```
-
-### Benefits
-
-| Benefit               | Explanation                                       |
-| --------------------- | ------------------------------------------------- |
-| Provider Redundancy   | Reduces dependence on a single provider           |
-| Better Coverage       | Different providers can expose different data     |
-| Resilience            | Provider failures can be handled more effectively |
-| Multi-Chain Expansion | New adapters can be added                         |
-| Consistency           | Downstream systems use one common schema          |
-
-Additional providers can later be added through the adapter layer:
-
-* Alchemy
-* Infura
-* QuickNode
-* Moralis
-* Covalent
-* Bitquery
-* Chainbase
-
----
-
-# 10. Data Normalization
-
-Different providers return blockchain data in different formats.
-
-The normalization layer converts them into a common representation.
-
-### Example
-
-```json
-{
-  "tx_hash": "0x123...",
-  "chain": "ethereum",
-  "from": "0xAAA...",
-  "to": "0xBBB...",
-  "amount": 47500,
-  "token": "ETH",
-  "timestamp": "2026-08-29T01:24:32",
-  "block": 123456,
-  "status": "success",
-  "source": "blockscout"
-}
-```
-
-### Technologies
-
-```text
+Provider A
+Normalization Layer
+Provider B
+Provider C
+Common Transaction Model
+Graph
+ML
+Rules
+Evidence
+LLM Context
+Technologies
 Python
 Pandas
 NumPy
 Pydantic
-```
 
-The normalized model becomes the foundation for:
+Normalized Transaction
+{
+  "tx_hash": "0x123",
+  "chain": "ethereum",
+  "from": "0xAAA",
+  "to": "0xBBB",
+  "amount": "4.2",
+  "token": "ETH",
+  "timestamp": "2026-08-29T01:24:32Z",
+  "block": 123456,
+  "status": "success",
+  "source": "blockscout"
+}
 
-```text
-Graph Construction
-       +
-Feature Engineering
-       +
-ML Analysis
-       +
-LLM Context
-       +
-Evidence Records
-```
+12. Pipeline 4 — Transaction Graph
+Objective
 
----
+Convert blockchain transactions into relationships.
 
-# 11. Transaction Graph
-
-The transaction graph is one of the most important components.
-
-### Graph Representation
-
-```text
 Wallet = Node
-Transaction = Directed Edge
-```
+
+Transaction = Edge
+
 
 Example:
 
-```text
-                  Victim
-                     |
-                   ₹50K
-                     |
-                     v
-                 Wallet A
-                     |
-                  ₹48.5K
-                     |
-                     v
-                 Wallet B
-                 /     \
-             ₹20K       ₹28K
-               |           |
-               v           v
-           Wallet C     Wallet D
-               \           /
-                \         /
-                  Exchange
-```
-
-### Node Types
-
-| Node           | Description                             |
-| -------------- | --------------------------------------- |
-| Victim Wallet  | Wallet reported in complaint            |
-| Suspect Wallet | Wallet under investigation              |
-| Intermediary   | Wallet between source and destination   |
-| VASP Wallet    | Known or inferred exchange/VASP address |
-| Contract       | Smart contract interaction              |
-| Bridge         | Cross-chain bridge address              |
-| Entity         | Identified organization                 |
-
-### Edge Types
-
-| Edge            | Meaning                 |
-| --------------- | ----------------------- |
-| TRANSFER        | Cryptocurrency transfer |
-| TOKEN_TRANSFER  | ERC-20/token movement   |
-| INTERACTED_WITH | Contract interaction    |
-| CROSSED_VIA     | Bridge interaction      |
-| ASSOCIATED_WITH | Entity association      |
-
-### Graph Technologies
-
-```text
-NetworkX
-Neo4j
-Cytoscape.js
-```
-
-NetworkX is useful for prototyping and algorithmic analysis, while Neo4j provides persistent graph storage and graph traversal at larger scale.
-
----
-
-# 12. Multi-Hop Fund Tracing
-
-The platform follows funds beyond the first destination.
-
-```text
 Victim
   |
+  | TRANSFER
   v
 Wallet A
   |
+  | TRANSFER
   v
 Wallet B
-  |
-  v
-Wallet C
-  |
-  v
-Wallet D
-  |
-  v
-Exchange
-```
 
-Example hop sequence:
+Graph Architecture
+flowchart LR
 
-| Hop | Address / Entity |
-| --: | ---------------- |
-|   0 | Victim           |
-|   1 | Wallet A         |
-|   2 | Wallet B         |
-|   3 | Wallet C         |
-|   4 | Wallet D         |
-|   5 | Exchange         |
+    TX[Normalized Transactions]
+        |
+        v
+    BUILDER[Graph Builder]
+        |
+        +----------------+
+        |                |
+        v                v
+    NetworkX           Neo4j
+        |                |
+        v                v
+    Analysis         Persistent Graph
 
-For every path, the system can calculate:
+Technologies
+NetworkX
+Neo4j
+Python
 
-* Hop count
-* Path value
-* Time between hops
-* Intermediary count
-* Percentage of original funds retained
-* Destination type
-* Risk factors
-* VASP distance
+Node Types
+Wallet
+Contract
+VASP
+Bridge
+Entity
 
-The investigator can configure the maximum tracing depth.
+Relationship Types
+TRANSFER
+TOKEN_TRANSFER
+INTERACTED_WITH
+ASSOCIATED_WITH
+CROSSED_VIA
 
----
+13. Pipeline 5 — Multi-Hop Fund Tracing
 
-# 13. Fund Flow Analysis
+The system follows funds beyond the first destination.
 
-For every investigated wallet, the system calculates:
+flowchart LR
 
-| Metric                            | Description                        |
-| --------------------------------- | ---------------------------------- |
-| Total Inflow                      | Total funds received               |
-| Total Outflow                     | Total funds sent                   |
-| Transaction Count                 | Number of transactions             |
-| Unique Senders                    | Number of source addresses         |
-| Unique Receivers                  | Number of destination addresses    |
-| Counterparties                    | Unique interacting wallets         |
-| Average Transaction               | Mean transaction value             |
-| Maximum Transaction               | Largest observed transaction       |
-| Transaction Frequency             | Movement frequency                 |
-| Average Time Between Transactions | Temporal behavior                  |
-| First Transaction                 | Earliest observed activity         |
-| Last Transaction                  | Most recent activity               |
-| Intermediary Count                | Wallets encountered during tracing |
+    V[Reported Wallet]
+      --> A[Wallet A]
+      --> B[Wallet B]
+      --> C[Wallet C]
+      --> D[Wallet D]
+      --> E[VASP / Exchange]
 
-Example:
 
-```text
-Inflow:                    ₹4,50,000
-Outflow:                   ₹4,42,000
-Transactions:              37
-Unique Counterparties:     18
-Average Interval:          4.2 minutes
-Maximum Transaction:       ₹1,20,000
-```
+For each path the system calculates:
 
----
+Hop count.
+Amount transferred.
+Percentage of original amount.
+Time between transactions.
+Number of intermediary wallets.
+Destination type.
+VASP distance.
+Suspicious behavior indicators.
+Example
+Hop 0 → Reported Wallet
+Hop 1 → Wallet A
+Hop 2 → Wallet B
+Hop 3 → Wallet C
+Hop 4 → Wallet D
+Hop 5 → Exchange
 
-# 14. Suspicious Pattern Detection
+Technologies
+NetworkX
+Neo4j
+Python
+Graph traversal algorithms
 
-The platform uses three complementary approaches:
+14. Pipeline 6 — Suspicious Pattern Detection
 
-```text
-Deterministic Rules
-        +
-Machine Learning
-        +
-Multiple LLMs
-```
+The system detects behavioral patterns using deterministic graph and transaction analysis.
 
-The LLMs interpret analytical evidence; they do not replace deterministic calculations.
-
----
-
-## 14.1 Rapid Fund Movement
-
-```text
-Wallet A
-   |
- 2 min
-   v
-Wallet B
-   |
- 3 min
-   v
-Wallet C
-```
-
-Flag:
-
-```text
-RAPID FUND MOVEMENT
-```
-
----
-
-## 14.2 Layering
-
-```text
+Rapid Movement
 A
 |
+| 1 min
 v
 B
 |
+| 2 min
 v
 C
-|
-v
-D
-|
-v
-E
-```
 
-A long sequence of intermediary wallets can be flagged for investigation as a potential layering pattern.
+Splitting
+        A
+      / | \
+     B  C  D
 
----
+Consolidation
+B ---\
+C ----> D
+E ---/
 
-## 14.3 Fund Splitting
+Layering
+A → B → C → D → E → F
 
-```text
-             Wallet A
-            /    |    \
-           v     v     v
-          B      C      D
-```
+Pattern Detection Pipeline
+Transactions
+Temporal Analysis
+Graph Analysis
+Amount Analysis
+Rapid Movement
+Splitting
+Consolidation
+Layering
+Abnormal Size
+Pattern Signals
+Technologies
+Python
+NetworkX
+Pandas
+NumPy
+scikit-learn
 
-One source distributing funds to several destinations can be identified as a splitting pattern.
+15. Pipeline 7 — VASP & Entity Intelligence
+Objective
 
----
-
-## 14.4 Fund Consolidation
-
-```text
-B ----\
-C -----+----> Exchange
-D -----/
-E ----/
-```
-
-Multiple wallets converging on a destination can be relevant to the investigation.
-
----
-
-## 14.5 Peel Chain
-
-```text
-A
-|
-v
-B
-|
-v
-C
-|
-v
-D
-```
-
-The system can look for repeated forwarding behavior where funds continue through a sequence of wallets while portions may be retained or forwarded.
-
----
-
-## 14.6 VASP Interaction
-
-```text
-Suspect Wallet
-      |
-      v
-Intermediary
-      |
-      v
-Known VASP Address
-```
-
-Important:
-
-> Interaction with a VASP is an investigative signal. It must not automatically be interpreted as evidence that the VASP is involved in criminal activity.
-
----
-
-# 15. VASP Identification
-
-**VASP** stands for **Virtual Asset Service Provider**.
-
-The platform attempts to determine whether a destination wallet is associated with an exchange or other VASP.
+Determine whether wallets are associated with known entities or VASPs.
 
 Potential intelligence sources include:
 
-* Verified address/entity datasets
-* OpenSanctions
-* FollowTheMoney
-* OpenAleph
-* Curated exchange address intelligence
-* Internal investigator-confirmed labels
-* Transactional evidence
-* Behavioral evidence
+OpenSanctions
+FollowTheMoney
+OpenAleph
+Curated Address Labels
+Investigator-Verified Labels
+Public Entity Information
 
-### Example
-
-```text
-0xEXCHANGE123
-       |
-       v
-Entity Intelligence
-       |
-       v
-Known Organization?
-       |
-       v
-Exchange / VASP
-```
-
-Example output:
-
-```text
-VASP IDENTIFIED
-
-Entity:
-Example Exchange
-
-Relationship:
-Receiving Wallet
-
-Distance:
-3 hops
-
-Attribution:
-VERIFIED
-
-Confidence:
-HIGH
-```
-
----
-
-# 16. Exchange Wallet Clustering
-
-An exchange may operate multiple addresses.
-
-```text
-                    Exchange X
-                  /     |      \
-                 /      |       \
-               W1       W2       W3
-               |        |        |
-              TX       TX       TX
-```
-
-The system can maintain an entity cluster:
-
-```text
-Entity: Exchange X
-
-Associated Addresses:
-- W1
-- W2
-- W3
-- W4
-- W5
-```
-
-Example path:
-
-```text
-Suspect
-   |
-   v
-Wallet A
-   |
-   v
-Wallet B
-   |
-   v
-W3
-   |
-   v
-Exchange X
-```
-
-Output:
-
-```text
-Nearest Identified VASP: Exchange X
-Distance: 3 hops
-Attribution: Verified / Inferred
-Confidence: High
-```
-
----
-
-# 17. Machine Learning Layer
-
-The ML architecture uses multiple signals instead of depending on one classifier.
-
-```mermaid
+Architecture
 flowchart TD
 
-    A[Transaction Data] --> B[Feature Engineering]
+    W[Wallet Address]
+       |
+       v
+    ENTITY[Entity Intelligence Layer]
+       |
+       +--> O[OpenSanctions]
+       +--> F[FollowTheMoney]
+       +--> A[OpenAleph]
+       +--> C[Curated Labels]
+       |
+       v
+    MATCH[Entity Matching]
+       |
+       v
+    ATTR[Attribution Classification]
+
+Attribution Levels
+VERIFIED
+INFERRED
+UNCONFIRMED
+UNKNOWN
+
+Critical Principle
+VASP Interaction
+       !=
+VASP Involvement in Fraud
+
+
+Interaction with an exchange is an investigative signal, not proof that the exchange participated in wrongdoing.
+
+16. Pipeline 8 — ML Risk Analysis
+
+Machine learning provides additional analytical signals.
+
+flowchart TD
+
+    A[Normalized Transactions]
+        |
+        v
+    B[Feature Engineering]
 
     B --> C[XGBoost]
     B --> D[Isolation Forest]
-    B --> E[Graph Analysis]
+    B --> E[Graph ML]
 
-    C --> F[ML Signals]
-    D --> F
-    E --> F
+    C --> F[Supervised Risk Signal]
+    D --> G[Anomaly Signal]
+    E --> H[Graph Risk Signal]
 
-    F --> G[Risk Engine]
-```
+    F --> I[ML Signal Aggregator]
+    G --> I
+    H --> I
 
----
-
-## 17.1 Feature Engineering
-
-Example features:
-
-```text
+Example Features
 transaction_count
 total_inflow
 total_outflow
 unique_senders
 unique_receivers
-unique_counterparties
-average_transaction
-maximum_transaction
 transaction_frequency
+average_transaction_size
+maximum_transaction_size
 average_time_between_transactions
 number_of_hops
-number_of_intermediaries
-fund_splitting_score
-fund_consolidation_score
+intermediary_count
+splitting_score
+consolidation_score
 rapid_transfer_score
 vasp_interaction
-cross_chain_interaction
 bridge_interaction
-```
+cross_chain_activity
 
-Example:
-
-```text
-Wallet A
-
-Transactions:              48
-Inflow:                    ₹8.2L
-Outflow:                   ₹8.0L
-Counterparties:            31
-Average Interval:          3.2 min
-Hops:                      6
-VASP Interaction:          YES
-```
-
----
-
-## 17.2 XGBoost
-
-XGBoost can be used as a supervised classification model when labeled training data is available.
-
-```text
-Features
-   |
-   v
+Models
 XGBoost
-   |
-   v
-Suspicious Probability
-```
-
-Example:
-
-```text
-XGBoost Probability = 0.89
-```
-
-The output is an analytical signal and not a legal conclusion.
-
----
-
-## 17.3 Isolation Forest
-
-Isolation Forest can identify unusual transaction behavior.
-
-```text
-Wallet Behavior
-      |
-      v
 Isolation Forest
-      |
-      v
-Anomaly Score
-```
-
-Example:
-
-```text
-Anomaly Score = 0.91
-```
-
----
-
-## 17.4 Graph ML
-
-Advanced graph models can be introduced as the platform scales.
-
-```text
-Transaction Graph
-       |
-       v
 PyTorch Geometric
-       |
-       +--> GraphSAGE
-       +--> GCN
-       +--> GAT
+GraphSAGE
+GCN
+GAT
+
+
+Graph ML is intended as an additional signal rather than a replacement for deterministic evidence.
+
+17. Pipeline 9 — Rule Engine
+
+The rule engine produces transparent and explainable risk factors.
+
+flowchart TD
+
+    A[Transaction Features]
        |
        v
-Graph Risk Signal
-```
+    B[Rule Engine]
 
-Graph ML acts as an additional signal rather than replacing deterministic evidence.
+    B --> C[Rapid Transfer Rule]
+    B --> D[Multiple Hop Rule]
+    B --> E[Splitting Rule]
+    B --> F[Consolidation Rule]
+    B --> G[VASP Interaction Rule]
+    B --> H[Abnormal Amount Rule]
 
----
+    C --> I[Rule Score]
+    D --> I
+    E --> I
+    F --> I
+    G --> I
+    H --> I
 
-# 18. Rule Engine
-
-The rule engine produces transparent and deterministic risk factors.
 
 Example configuration:
 
-| Rule                       | Example Weight |
-| -------------------------- | -------------: |
-| Rapid Transfers            |            +15 |
-| Multiple Intermediary Hops |            +15 |
-| Fund Splitting             |            +10 |
-| Fund Consolidation         |            +10 |
-| Known Risky Entity         |            +20 |
-| VASP Interaction           |            +15 |
-| Abnormal Transaction Size  |            +10 |
-| Cross-Chain Movement       |             +5 |
+Rule	Example Weight
+Rapid Transfers	+15
+Multiple Hops	+15
+Fund Splitting	+10
+Consolidation	+10
+VASP Interaction	+15
+Abnormal Transaction Size	+10
 
-Maximum:
+Weights should be configurable and validated against appropriate evaluation data.
 
-```text
-100
-```
+They should not be treated as universal truth.
 
-These weights should be configurable and calibrated against validation data rather than treated as universal truth.
+18. Pipeline 10 — Multi-LLM Intelligence
 
----
+The platform uses three specialized LLM roles.
 
-# 19. Mandatory Multi-LLM Architecture
-
-## Multiple LLMs are a required part of the platform.
-
-The platform does **not** treat multi-LLM intelligence as an optional enhancement.
-
-The initial architecture uses:
-
-```text
-Qwen
-Mistral
-Llama
-```
-
-Each model has a specialized responsibility.
-
-The purpose is:
-
-```text
-Specialization
-      +
-Cross-Validation
-      +
-Evidence Review
-      +
-Reduced Single-Model Dependency
-```
-
----
-
-## Multi-LLM Architecture
-
-```mermaid
 flowchart TD
 
-    A[Structured Evidence Package] --> B[LLM Orchestrator]
+    E[Structured Evidence Package]
+        |
+        v
+    O[LLM Orchestrator]
 
-    B --> C[Qwen<br/>Investigation Analyst]
-    B --> D[Mistral<br/>Evidence Reviewer]
-    B --> E[Llama<br/>Investigator Copilot]
+    O --> Q[Qwen<br/>Investigation Analyst]
+    O --> M[Mistral<br/>Evidence Reviewer]
+    O --> L[Llama<br/>Investigator Copilot]
 
-    C --> F[Consensus / Conflict Detection]
-    D --> F
-    E --> F
+    Q --> C[Consensus / Conflict Detection]
+    M --> C
+    L --> C
 
-    F --> G[Evidence Correlation]
-    G --> H[Final Risk Engine]
-    H --> I[Investigator Output]
-```
+    C --> V[Evidence Validation]
 
----
+Qwen — Investigation Analyst
 
-# 20. Specialized LLM Roles
+Responsibilities:
 
-| Model   | Role                  | Main Responsibility                           |
-| ------- | --------------------- | --------------------------------------------- |
-| Qwen    | Investigation Analyst | Analyze paths and suspicious patterns         |
-| Mistral | Evidence Reviewer     | Challenge claims and verify evidence support  |
-| Llama   | Investigator Copilot  | Explain findings and generate recommendations |
+Analyze transaction paths.
+Explain suspicious patterns.
+Identify important wallets.
+Summarize fund flows.
+Generate investigative questions.
+Evidence
+   ↓
+Qwen
+   ↓
+Investigation Analysis
 
----
+Mistral — Evidence Reviewer
 
-## 20.1 Qwen — Investigation Analyst
+Responsibilities:
 
-### Responsibilities
-
-* Summarize transaction paths.
-* Explain suspicious movement patterns.
-* Identify notable wallet relationships.
-* Convert graph paths into investigator-readable narratives.
-* Suggest investigative questions.
-
-### Input
-
-```text
-Structured Transactions
-Graph Paths
-Risk Features
-VASP Findings
-Rule Results
-ML Signals
-```
-
-### Output
-
-```text
-Investigation Summary
-Key Wallets
-Important Paths
-Suspicious Patterns
-Questions for Investigator
-```
-
----
-
-## 20.2 Mistral — Evidence Reviewer
-
-Mistral acts as the critical review layer.
-
-### Responsibilities
-
-* Review evidence-backed findings.
-* Check whether claims are supported.
-* Separate facts from inferences.
-* Identify unsupported conclusions.
-* Detect contradictions.
-* Evaluate confidence categories.
-
-Example:
-
-```text
-Claim:
-"Wallet C belongs to Exchange X."
-
-Evidence:
-Verified entity dataset
-
-Conclusion:
-SUPPORTED
-```
-
-If only behavioral evidence exists:
-
-```text
-Conclusion:
-INFERENCE — NOT VERIFIED
-```
-
----
-
-## 20.3 Llama — Investigator Copilot
-
-### Responsibilities
-
-* Generate case summaries.
-* Convert structured evidence into report-ready language.
-* Generate investigative recommendations.
-* Answer investigator questions.
-* Explain graph paths.
-
-Example question:
-
-```text
-Why was Wallet B flagged?
-```
-
-Expected structure:
-
-```text
-Wallet B was flagged because:
-
-1. It received funds from the reported wallet.
-2. It forwarded most of the funds shortly afterward.
-3. It participated in a multi-hop path.
-4. It interacted with a VASP-associated address.
-
-Evidence:
-TX001
-TX002
-TX005
-```
-
----
-
-# 21. Multi-LLM Consensus
-
-Multiple LLM outputs should not simply be concatenated.
-
-Instead:
-
-```text
-Qwen Analysis
-       +
+Challenge analytical claims.
+Check evidence support.
+Identify unsupported conclusions.
+Separate facts from inferences.
+Identify contradictions.
+Qwen Finding
+     ↓
 Mistral Review
-       +
-Llama Explanation
+     ↓
+SUPPORTED / UNSUPPORTED / UNCERTAIN
+
+Llama — Investigator Copilot
+
+Responsibilities:
+
+Explain findings.
+Generate investigator-readable summaries.
+Produce recommendations.
+Assist with case questions.
+Help generate report language.
+Validated Evidence
+      ↓
+Llama
+      ↓
+Explanation + Recommendations
+
+19. Pipeline 11 — Evidence Correlation
+
+The platform must connect important conclusions to supporting evidence.
+
+flowchart TD
+
+    A[Finding]
        |
        v
-Conflict Detection
+    B[Evidence IDs]
        |
        v
-Evidence Grounding
+    C[Transaction Records]
        |
        v
-Final Conclusion
-```
+    D[Blockchain Source]
+       |
+       v
+    E[Validation]
+       |
+       v
+    F[Supported Finding]
 
-### Example
-
-Qwen:
-
-```text
-Wallet C appears associated with Exchange X.
-```
-
-Mistral:
-
-```text
-Available evidence does not verify ownership.
-```
-
-Llama:
-
-```text
-Wallet C has characteristics consistent with
-an exchange-associated address.
-```
-
-Final conclusion:
-
-```text
-Attribution:
-INFERRED
-
-Reason:
-Behavior is consistent with the exchange cluster,
-but direct ownership evidence was not established.
-```
-
-This prevents an LLM from converting an analytical inference into a factual attribution.
-
----
-
-# 22. LLM Guardrails
-
-The LLM layer receives structured and controlled context.
-
-The models should not independently calculate critical blockchain facts when deterministic software can calculate them.
-
-Every generated statement should be classified as:
-
-| Classification | Meaning                                   |
-| -------------- | ----------------------------------------- |
-| FACT           | Directly supported by structured evidence |
-| INFERENCE      | Analytical interpretation                 |
-| RECOMMENDATION | Suggested investigative next step         |
-| UNCERTAINTY    | Missing or ambiguous evidence             |
-
-### LLMs must not:
-
-* Invent transaction hashes.
-* Invent wallet ownership.
-* Invent VASP relationships.
-* Change numerical values.
-* Create unsupported evidence.
-* Make legal conclusions.
-* Automatically trigger enforcement actions.
-
-### Example
-
-```text
-FACT:
-Wallet A sent 4.2 ETH to Wallet B.
-
-INFERENCE:
-Wallet B may be part of a layering path.
-
-RECOMMENDATION:
-Review Wallet B's incoming and outgoing relationships.
-
-UNCERTAINTY:
-Ownership of Wallet B is not verified.
-```
-
----
-
-# 23. Evidence Correlation
-
-A core design principle is:
-
-> **Every important finding should be traceable to evidence.**
 
 Example:
 
-```text
-Finding:
-VASP Association
+{
+  "finding": "Rapid fund movement",
+  "classification": "FACT",
+  "evidence_ids": [
+    "E001",
+    "E002",
+    "E003"
+  ],
+  "confidence": "HIGH"
+}
 
-Evidence:
-Transaction Hash:
-0x7a83...
 
-Block:
-12345678
+Every important finding should ideally have:
 
-Timestamp:
-2026-08-29 01:24:32
+Transaction Hash
+Block Number
+Timestamp
+Wallet
+Amount
+Direction
+Data Source
+Evidence ID
+Detection Rule
+Model Signal
+Confidence
 
-Source:
-Blockchain / Entity Intelligence
+20. Pipeline 12 — Final Risk Engine
 
-Attribution:
-Verified
+The final risk engine combines independent signals.
 
-Confidence:
+Rule Score
+ML Score
+Graph Risk
+Pattern Signals
+VASP Intelligence
+Evidence Validation
+Final Risk Engine
+Risk Score 0-100
+LOW
+MEDIUM
 HIGH
-```
-
-The evidence system preserves:
-
-| Evidence           | Stored |
-| ------------------ | ------ |
-| Transaction Hash   | Yes    |
-| Block Number       | Yes    |
-| Timestamp          | Yes    |
-| Wallet Address     | Yes    |
-| Direction          | Yes    |
-| Amount             | Yes    |
-| Data Source        | Yes    |
-| Attribution Source | Yes    |
-| Graph Relationship | Yes    |
-| Detection Rule     | Yes    |
-| ML Signal          | Yes    |
-| LLM Explanation    | Yes    |
-| Confidence         | Yes    |
-| Uncertainty        | Yes    |
-
----
-
-# 24. Final Risk Engine
-
-The final risk assessment combines independent signals.
-
-```text
-             RULE ENGINE
-                  |
-                  v
-              Rule Score
-                  |
-                  |
-ML Score ----------+---------- Graph Score
-                  |
-                  v
-              RISK ENGINE
-                  |
-                  v
-               0 - 100
-```
 
 Example:
 
-```text
-Rule Score:        82
-XGBoost:           89%
-Anomaly Score:     91%
-Graph Risk:        HIGH
-VASP:              IDENTIFIED
-```
+Rule Score:          82
+XGBoost Signal:      89%
+Anomaly Score:       91%
+Graph Risk:          HIGH
+VASP Attribution:    INFERRED
 
-Final display:
 
-```text
-+--------------------------+
-|       RISK: 91/100       |
-|           HIGH           |
-+--------------------------+
-```
+Final result:
 
-The exact combination formula should be configurable and validated experimentally.
+RISK: 91 / 100
+LEVEL: HIGH
 
----
 
-# 25. Explainable Risk Factors
+The final scoring formula should remain configurable and be calibrated using validation data.
 
-The system should never display only:
+21. Pipeline 13 — Investigator Dashboard
 
-```text
-HIGH RISK
-```
+The dashboard provides one unified investigation workspace.
 
-Instead, it should explain why.
+flowchart TD
 
-Example:
+    A[Investigation Case]
+       |
+       v
+    B[Dashboard]
 
-```text
-HIGH RISK — 91/100
+    B --> C[Case Summary]
+    B --> D[Transaction Statistics]
+    B --> E[Fund Flow]
+    B --> F[Transaction Graph]
+    B --> G[VASP Findings]
+    B --> H[Risk Factors]
+    B --> I[ML Signals]
+    B --> J[LLM Analysis]
+    B --> K[Evidence]
+    B --> L[Recommendations]
 
-Reasons:
-
-- Funds moved through 6 intermediary wallets.
-- 83% of funds moved within 15 minutes.
-- Significant fund splitting was detected.
-- Destination interacted with a VASP-associated address.
-- Transaction behavior was anomalous compared with the model baseline.
-```
-
-Each reason should link to supporting evidence where possible.
-
----
-
-# 26. Investigative Recommendations
-
-The recommendation engine combines deterministic findings with the multi-LLM layer.
-
-Example:
-
-```text
-INVESTIGATIVE RECOMMENDATIONS
-
-1. Review Wallet B and Wallet C as intermediary wallets.
-
-2. Verify the identified VASP association.
-
-3. Preserve relevant transaction evidence.
-
-4. Review the destination wallet for additional related cases.
-
-5. Consider appropriate VASP coordination based on verified attribution.
-```
-
-The system provides recommendations to investigators.
-
-It does not automatically take legal or enforcement action.
-
----
-
-# 27. Case Management
-
-Investigators can create and manage cases.
-
-Example:
-
-```text
-CASE #CYBER-2026-001
-
-Status:
-ACTIVE
-
-Fraud Type:
-Investment Fraud
-
-Reported Wallet:
-0xABC...
-
-Risk:
-91 HIGH
-
-VASP:
-Exchange X
-
-Transactions:
-127
-
-Intermediary Wallets:
-8
-```
-
-### Case Objects
-
-```text
-Case
- |
- +-- Evidence
- |
- +-- Wallets
- |
- +-- Transactions
- |
- +-- Reports
- |
- +-- Alerts
- |
- +-- Investigators
- |
- +-- LLM Analysis
- |
- +-- Risk History
-```
-
----
-
-# 28. Investigator Dashboard
-
-The frontend provides a single investigation workspace.
-
-```text
-+------------------------------------------------------+
-| CRYPTO FRAUD INTELLIGENCE PLATFORM                   |
-+------------------------------------------------------+
-| Case: CYBER-2026-001                 HIGH 91/100     |
-| Wallet: 0xABC123...                                   |
-+------------+----------------+-------------------------+
-| TRANSACT.  | FUND FLOW      | VASP                    |
-| 127        | ₹8.2L          | Exchange X              |
-+------------+----------------+-------------------------+
-|                                                      |
-|                 TRANSACTION GRAPH                    |
-|                                                      |
-|       A -------- B -------- C                        |
-|                 /          \                         |
-|                D            E                        |
-|                 \          /                         |
-|                    VASP                              |
-|                                                      |
-+------------------------------------------------------+
-| RISK FACTORS                                         |
-|                                                      |
-| Rapid movement                 HIGH                  |
-| Multiple hops                  HIGH                  |
-| Fund splitting                 MEDIUM                |
-| VASP interaction               HIGH                  |
-+------------------------------------------------------+
-| [TRANSACTIONS] [EVIDENCE] [LLM ANALYSIS] [REPORT]   |
-+------------------------------------------------------+
-```
-
-### Frontend Stack
-
-```text
+Frontend Technologies
 React
 Vite
 Tailwind CSS
 Cytoscape.js
 Recharts
-```
 
----
 
-# 29. Real-Time Monitoring
+Example interface:
 
-The platform supports real-time or near-real-time monitoring.
++------------------------------------------------------+
+| CRYPTO FRAUD INVESTIGATION                           |
++------------------------------------------------------+
+| Case: CYBER-2026-001                  HIGH 91/100    |
+| Wallet: 0xABC123...                                  |
++------------+--------------+--------------------------+
+| TX COUNT   | FUND FLOW    | VASP                     |
+| 127        | ₹8.2L        | Exchange X              |
++------------+--------------+--------------------------+
+|                                                      |
+|              TRANSACTION GRAPH                      |
+|                                                      |
+|       A ------ B ------ C                            |
+|              /          \                            |
+|             D            E                           |
+|              \          /                            |
+|                 VASP                                |
+|                                                      |
++------------------------------------------------------+
+| RISK FACTORS                                         |
+|                                                      |
+| Rapid Movement              HIGH                     |
+| Multiple Hops               HIGH                     |
+| Splitting                   MEDIUM                   |
+| VASP Interaction            HIGH                     |
++------------------------------------------------------+
 
-For the MVP, periodic polling can be used.
+22. Pipeline 14 — Real-Time Monitoring
 
-```mermaid
+Production deployments can monitor new blockchain activity.
+
+Event-Driven Architecture
 flowchart TD
 
-    A[Blockchain] --> B[Polling / Event Listener]
-    B --> C{New Transaction?}
+    A[Blockchain]
+       |
+       v
+    B[Event Listener / Indexer]
+       |
+       v
+    C[New Transaction]
+       |
+       v
+    D[Transaction Processor]
+       |
+       v
+    E[Pattern Detection]
+       |
+       v
+    F[Risk Engine]
+       |
+       v
+    G{Risk Threshold}
 
-    C -->|No| B
-    C -->|Yes| D[Transaction Analysis]
+    G -->|High| H[Alert]
+    G -->|Normal| I[Store]
 
-    D --> E[Pattern Detection]
-    E --> F[Risk Engine]
 
-    F --> G{High Risk?}
+For the MVP, periodic polling is sufficient.
 
-    G -->|Yes| H[Alert]
-    G -->|No| I[Store Transaction]
-```
+Production systems can use:
 
-Example:
+Blockchain Events
+Kafka
+Stream Processing
+WebSockets
+Redis
+Background Workers
 
-```text
-NEW HIGH-RISK TRANSACTION
+23. Cross-Chain Architecture
 
-Wallet:
-0xABC...
+The system is designed around a chain-agnostic normalized data model.
 
-Amount:
-₹2,40,000
+Ethereum
+Polygon
+BNB Chain
+Bitcoin
+Solana
+Normalized Transaction Model
+Graph Engine
+ML Engine
+Risk Engine
 
-Destination:
-0xXYZ...
+Each chain has its own adapter.
 
-Pattern:
-Rapid Forwarding
+Chain Adapter
+      ↓
+Provider Adapter
+      ↓
+Common Transaction Model
+      ↓
+Analysis Engine
 
-Risk:
-HIGH
-```
 
-A production deployment can later use streaming infrastructure.
+This prevents blockchain-specific logic from spreading throughout the application.
 
----
+24. Bridge Detection
 
-# 30. Cross-Chain Architecture
-
-The normalized architecture is designed for multiple chains.
-
-```text
-Ethereum ----\
-Polygon ------\
-BNB ------------> Normalized Transaction Model
-Bitcoin ------/
-Solana -------/
-```
-
-Each blockchain adapter produces a common structure:
-
-```json
-{
-  "chain": "ethereum",
-  "sender": "0xAAA...",
-  "receiver": "0xBBB...",
-  "amount": "4.2",
-  "timestamp": "2026-08-29T01:24:32",
-  "tx_hash": "0x123..."
-}
-```
-
-This allows the analysis engine to remain chain-agnostic.
-
----
-
-# 31. Bridge Detection
+Cross-chain bridges are important because funds can move from one network to another.
 
 Example:
 
-```text
 Ethereum
     |
     v
- Bridge
+Bridge Contract
     |
     v
 Polygon
     |
     v
 Wallet
-```
 
-The system can flag:
+MVP Approach
 
-```text
-CROSS-CHAIN MOVEMENT DETECTED
-```
+Use:
 
-For an MVP, bridge detection can use:
-
-* Known bridge contracts.
-* Bridge address lists.
-* Normalized transaction patterns.
-* Source/destination timing.
-* Known bridge events where available.
-
-Future versions can introduce deeper cross-chain correlation.
-
----
-
-# 32. API Architecture
-
-The platform exposes REST APIs.
-
-| Method | Endpoint                             | Purpose               |
-| ------ | ------------------------------------ | --------------------- |
-| POST   | `/api/cases`                         | Create case           |
-| POST   | `/api/analyze-wallet`                | Start wallet analysis |
-| GET    | `/api/wallet/{address}`              | Wallet information    |
-| GET    | `/api/wallet/{address}/transactions` | Wallet transactions   |
-| GET    | `/api/wallet/{address}/graph`        | Transaction graph     |
-| GET    | `/api/wallet/{address}/risk`         | Risk analysis         |
-| GET    | `/api/wallet/{address}/vasp`         | VASP intelligence     |
-| GET    | `/api/wallet/{address}/fund-flow`    | Fund flow             |
-| GET    | `/api/cases/{case_id}`               | Case details          |
-| POST   | `/api/cases/{case_id}/report`        | Generate report       |
-| GET    | `/api/alerts`                        | Retrieve alerts       |
-| POST   | `/api/llm/analyze`                   | Run analyst model     |
-| POST   | `/api/llm/review`                    | Run evidence reviewer |
-
-This provides a clean integration boundary for future systems.
-
----
-
-# 33. Database Architecture
-
-The system uses both relational and graph databases.
-
-## PostgreSQL
-
-Used for structured application data.
-
-```text
-cases
-investigators
-wallets
-transactions
-evidence
-alerts
-risk_scores
-llm_outputs
-reports
-entity_matches
-```
-
-## Neo4j
-
-Used for graph relationships.
-
-```text
-(Wallet)-[TRANSFER]->(Wallet)
-
-(Wallet)-[INTERACTED_WITH]->(Contract)
-
-(Wallet)-[ASSOCIATED_WITH]->(VASP)
-
-(Wallet)-[CROSSED_VIA]->(Bridge)
-```
-
-### Architecture
-
-```mermaid
+Known bridge contract lists.
+Bridge event signatures.
+Known bridge addresses.
+Transaction timing.
+Cross-chain transaction correlation.
+Production Approach
 flowchart LR
 
-    A[FastAPI]
+    A[Chain A]
+       |
+       v
+    B[Bridge Detection]
+       |
+       v
+    C[Cross-Chain Event]
+       |
+       v
+    D[Chain B]
+       |
+       v
+    E[Correlation Engine]
 
-    A --> B[PostgreSQL]
-    A --> C[Neo4j]
 
-    B --> D[Cases / Evidence / Reports]
-    C --> E[Wallet Graph / Transaction Paths]
-```
+Output:
 
----
+CROSS-CHAIN MOVEMENT DETECTED
 
-# 34. Evidence Data Model
+Source Chain:
+Ethereum
 
-A finding can be represented as:
+Bridge:
+Known Bridge Contract
 
-```json
-{
-  "finding_type": "vasp_association",
-  "wallet": "0xABC...",
-  "entity": "Example Exchange",
-  "attribution": "verified",
-  "confidence": "high",
-  "evidence": [
-    {
-      "tx_hash": "0x123...",
-      "block": 12345678,
-      "timestamp": "2026-08-29T01:24:32"
-    }
-  ],
-  "source": "entity_intelligence"
-}
-```
+Destination Chain:
+Polygon
 
-This structure helps with:
+25. Database Architecture
 
-```text
-Evidence Grounding
-        +
-LLM Validation
-        +
-Auditability
-        +
-Report Generation
-```
+The production architecture uses both relational and graph storage.
 
----
-
-# 35. LLM Context Pipeline
-
-The LLMs should receive a structured investigation package.
-
-```text
-Raw Blockchain Data
-        |
-        v
-Normalization
-        |
-        v
-Graph Analysis
-        |
-        v
-Feature Extraction
-        |
-        v
-Rule + ML Results
-        |
-        v
-VASP / Entity Findings
-        |
-        v
-Evidence Package
-        |
-        v
-Multi-LLM Layer
-```
-
-The LLM should not be responsible for calculating:
-
-* Transaction totals
-* Graph distances
-* Hop counts
-* Wallet balances
-* Numerical risk calculations
-
-when deterministic software can calculate them reliably.
-
----
-
-# 36. LLM Output Schema
-
-LLM outputs should be structured.
-
-Example:
-
-```json
-{
-  "summary": "The reported wallet transferred funds through multiple intermediary wallets.",
-  "key_findings": [
-    {
-      "finding": "Wallet B received funds from the reported wallet.",
-      "classification": "FACT",
-      "evidence_ids": ["E001", "E002"]
-    }
-  ],
-  "inferences": [
-    {
-      "statement": "Wallet C may be part of a layering path.",
-      "confidence": "MEDIUM"
-    }
-  ],
-  "recommendations": [
-    "Review Wallet B's subsequent outgoing transactions."
-  ],
-  "uncertainties": [
-    "Ownership of Wallet C is not verified."
-  ]
-}
-```
-
-Structured output allows the backend to validate LLM responses before displaying them.
-
----
-
-# 37. Report Generation
-
-The final investigation can be converted into a standardized PDF.
-
-```text
-Investigation
-      |
-      v
-Report Engine
-      |
-      v
-PDF
-```
-
-### Report Sections
-
-|  # | Section                         |
-| -: | ------------------------------- |
-|  1 | Case Information                |
-|  2 | Reported Wallet                 |
-|  3 | Blockchain                      |
-|  4 | Fund Flow Summary               |
-|  5 | Transaction Statistics          |
-|  6 | Transaction Graph               |
-|  7 | Intermediary Wallets            |
-|  8 | VASP / Entity Findings          |
-|  9 | Suspicious Patterns             |
-| 10 | ML Risk Signals                 |
-| 11 | Rule-Based Risk Factors         |
-| 12 | Multi-LLM Investigation Summary |
-| 13 | Evidence Table                  |
-| 14 | Uncertainties                   |
-| 15 | Recommendations                 |
-| 16 | Technical Sources               |
-| 17 | Report Metadata                 |
-
-### Technologies
-
-```text
-ReportLab
-WeasyPrint
-```
-
----
-
-# 38. Complete Data Flow
-
-```mermaid
-flowchart TD
-
-    A[Victim] --> B[NCRP / LEA Input]
-    B --> C[Wallet Address]
-
-    C --> D[FastAPI API Gateway]
-    D --> E[Case Management]
-
-    E --> F[Blockchain Service]
-
-    F --> G[Blockscout]
-    F --> H[Etherscan]
-    F --> I[Web3.py]
-
-    G --> J[Data Normalization]
-    H --> J
-    I --> J
-
-    J --> K[Transaction Engine]
-
-    K --> L[Feature Extraction]
-    K --> M[Graph Engine]
-
-    M --> N[NetworkX / Neo4j]
-
-    L --> O[XGBoost]
-    L --> P[Isolation Forest]
-
-    N --> Q[Graph Analysis]
-
-    O --> R[ML Signals]
-    P --> R
-    Q --> R
-
-    R --> S[Rule Engine]
-
-    S --> T[Entity Intelligence]
-
-    T --> U[OpenSanctions]
-    T --> V[FollowTheMoney]
-    T --> W[OpenAleph]
-
-    U --> X[VASP Findings]
-    V --> X
-    W --> X
-
-    X --> Y[Evidence Package]
-
-    Y --> Z1[Qwen Analyst]
-    Y --> Z2[Mistral Reviewer]
-    Y --> Z3[Llama Copilot]
-
-    Z1 --> AA[Consensus / Conflict Analysis]
-    Z2 --> AA
-    Z3 --> AA
-
-    AA --> AB[Evidence Correlation]
-    AB --> AC[Final Risk Engine]
-
-    AC --> AD[Investigator Dashboard]
-    AC --> AE[Alerts]
-
-    AD --> AF[Recommendations]
-    AD --> AG[PDF Report]
-```
-
----
-
-# 39. Security and Reliability
-
-Because the platform can process sensitive investigative information, production deployments should implement strong security controls.
-
-| Security Area      | Implementation                           |
-| ------------------ | ---------------------------------------- |
-| Authentication     | Secure investigator authentication       |
-| Authorization      | Role-Based Access Control                |
-| Secrets            | Environment variables / secret manager   |
-| API Security       | Authentication + rate limiting           |
-| Input Validation   | Pydantic validation                      |
-| Database Security  | Access controls and encryption           |
-| Auditability       | Case and evidence audit logs             |
-| LLM Security       | Controlled context and output validation |
-| Evidence Integrity | Provenance and immutable identifiers     |
-| Model Tracking     | Model/version metadata                   |
-| Data Provenance    | Provider/source tracking                 |
-
-The platform should preserve provenance:
-
-```text
-Who created the case?
-Who modified the case?
-Which API supplied the transaction?
-Which model generated the explanation?
-Which evidence supported the finding?
-When was the finding generated?
-```
-
----
-
-# 40. Repository Structure
-
-Recommended repository:
-
-```text
-crypto-fraud-platform/
-|
-+-- frontend/
-|   +-- src/
-|   |   +-- components/
-|   |   +-- pages/
-|   |   +-- graph/
-|   |   +-- charts/
-|   |   +-- services/
-|   |   +-- hooks/
-|   |
-|   +-- package.json
-|
-+-- backend/
-|   +-- app/
-|       +-- main.py
-|       |
-|       +-- api/
-|       |
-|       +-- models/
-|       |
-|       +-- schemas/
-|       |
-|       +-- services/
-|       |   +-- blockchain/
-|       |   +-- graph/
-|       |   +-- vasp/
-|       |   +-- risk/
-|       |   +-- llm/
-|       |   +-- evidence/
-|       |   +-- reports/
-|       |
-|       +-- ml/
-|       |
-|       +-- rules/
-|       |
-|       +-- database/
-|
-+-- llm/
-|   +-- orchestrator/
-|   |
-|   +-- prompts/
-|   |
-|   +-- agents/
-|       +-- analyst/
-|       +-- evidence_reviewer/
-|       +-- investigator_copilot/
-|
-+-- graph/
-|   +-- queries/
-|   +-- algorithms/
-|
-+-- ml/
-|   +-- training/
-|   +-- inference/
-|   +-- features/
-|
-+-- datasets/
-|
-+-- reports/
-|
-+-- docker/
-|
-+-- docs/
-|
-+-- tests/
-|
-+-- docker-compose.yml
-|
-+-- .env.example
-|
-+-- requirements.txt
-|
-+-- README.md
-```
-
----
-
-# 41. Two-Day SIH MVP
-
-The full architecture is intentionally larger than the first prototype.
-
-The MVP should demonstrate one complete investigation from wallet submission to evidence-backed report.
-
----
-
-## Day 1
-
-```text
-Wallet Input
-     |
-     v
 FastAPI
-     |
-     v
-Blockchain API
-     |
-     v
-Transaction Retrieval
-     |
-     v
-Data Normalization
-     |
-     v
-Graph Construction
-     |
-     v
-Multi-Hop Tracing
-     |
-     v
-VASP Matching
-```
-
-### Day 1 Deliverables
-
-| Module               | MVP |
-| -------------------- | --- |
-| Wallet Input         | Yes |
-| Case Creation        | Yes |
-| Blockchain Retrieval | Yes |
-| Data Normalization   | Yes |
-| Graph Construction   | Yes |
-| Multi-Hop Tracing    | Yes |
-| VASP Matching        | Yes |
-
----
-
-## Day 2
-
-```text
-Rule Engine
-     |
-     v
-XGBoost / Isolation Forest
-     |
-     v
-Mandatory Multi-LLM Layer
-     |
-     +--> Qwen Analyst
-     +--> Mistral Evidence Reviewer
-     +--> Llama Investigator Copilot
-     |
-     v
-Risk Engine
-     |
-     v
-Dashboard
-     |
-     v
-Graph Visualization
-     |
-     v
-Alerts
-     |
-     v
-PDF Report
-```
-
-### Day 2 Deliverables
-
-| Module               | MVP       |
-| -------------------- | --------- |
-| Rule Engine          | Yes       |
-| ML Signals           | Yes       |
-| Qwen                 | Mandatory |
-| Mistral              | Mandatory |
-| Llama                | Mandatory |
-| LLM Cross-Validation | Yes       |
-| Risk Engine          | Yes       |
-| Dashboard            | Yes       |
-| Alerts               | Yes       |
-| PDF Report           | Yes       |
-
----
-
-# 42. MVP vs Scalable Architecture
-
-| Component  | MVP                              | Scalable Version                  |
-| ---------- | -------------------------------- | --------------------------------- |
-| Frontend   | React + Tailwind                 | React + Tailwind                  |
-| API        | FastAPI                          | FastAPI + API Gateway             |
-| Blockchain | Blockscout + Etherscan + Web3.py | Multi-provider adapter layer      |
-| Database   | PostgreSQL                       | PostgreSQL + Neo4j                |
-| Graph      | NetworkX                         | NetworkX + Neo4j                  |
-| ML         | XGBoost + Isolation Forest       | ML ensemble + Graph ML            |
-| Graph ML   | Optional for later               | PyTorch Geometric                 |
-| VASP       | OpenSanctions + curated data     | Expanded entity intelligence      |
-| LLMs       | Qwen + Mistral + Llama           | Multi-model serving/orchestration |
-| Real-Time  | Periodic polling                 | Event/stream processing           |
-| Chains     | Initial EVM support              | Multi-chain adapters              |
-| Bridges    | Known bridge contracts           | Cross-chain correlation           |
-| Reports    | ReportLab                        | ReportLab + WeasyPrint            |
-| Deployment | Docker                           | Cloud/container deployment        |
-
----
-
-# 43. Why Multiple LLMs?
-
-Multiple LLMs are required because the objective is not simply to add more AI.
-
-The purpose is:
-
-```text
-Specialization
-     +
-Independent Review
-     +
-Cross-Validation
-     +
-Evidence Grounding
-```
-
-A single LLM may:
-
-* Misinterpret a graph relationship.
-* Convert an inference into a fact.
-* Miss uncertainty.
-* Produce an unsupported recommendation.
-
-The multi-LLM pipeline is:
-
-```text
-Model 1
-Analyze
-   |
-   v
-Model 2
-Critically Review
-   |
-   v
-Model 3
-Explain / Assist Investigator
-   |
-   v
-Evidence Correlation
-```
-
-The LLM layer therefore complements:
-
-```text
-Blockchain Evidence
-        +
-Graph Analytics
-        +
-Rules
-        +
-Machine Learning
-        +
-Entity Intelligence
-        +
-Multiple LLMs
-```
-
----
-
-# 44. What Makes the Platform Different?
-
-A conventional blockchain explorer answers:
-
-```text
-"What transactions happened?"
-```
-
-The proposed platform answers:
-
-```text
-"A victim reported this wallet.
-
-Where did the funds move?
-
-Which intermediary wallets were involved?
-
-Did the funds reach a VASP?
-
-What suspicious patterns occurred?
-
-What evidence supports those findings?
-
-How confident are the conclusions?
-
-What should the investigator examine next?"
-```
-
-### Key Differentiators
-
-| Differentiator               | Platform |
-| ---------------------------- | -------- |
-| Investigation-first workflow | Yes      |
-| Multi-hop fund tracing       | Yes      |
-| Transaction graph            | Yes      |
-| VASP/entity intelligence     | Yes      |
-| Exchange wallet clustering   | Yes      |
-| Rule-based risk              | Yes      |
-| ML risk signals              | Yes      |
-| Graph analysis               | Yes      |
-| Mandatory multi-LLM layer    | Yes      |
-| LLM cross-validation         | Yes      |
-| Evidence grounding           | Yes      |
-| Real-time monitoring         | Yes      |
-| Cross-chain ready            | Yes      |
-| Standardized reports         | Yes      |
-
----
-
-# 45. Analytical Principles
-
-The system must distinguish between analytical risk and legal conclusions.
-
-## High Risk ≠ Criminal / Guilty
-
-```text
-HIGH RISK
-    !=
-CRIMINAL
-```
-
-## VASP Interaction ≠ VASP Involvement
-
-```text
-VASP INTERACTION
-    !=
-VASP INVOLVEMENT IN FRAUD
-```
-
-## Behavioral Similarity ≠ Verified Ownership
-
-```text
-BEHAVIORAL SIMILARITY
-    !=
-OWNERSHIP VERIFIED
-```
-
-### Attribution Categories
-
-| Category    | Meaning                                                  |
-| ----------- | -------------------------------------------------------- |
-| VERIFIED    | Supported by explicit attribution evidence               |
-| INFERRED    | Analytical inference supported by behavior/relationships |
-| UNCONFIRMED | Insufficient evidence                                    |
-| UNKNOWN     | No meaningful attribution available                      |
-
-The platform is an investigative intelligence and decision-support system.
-
-Human investigators remain responsible for:
-
-* Interpretation
-* Verification
-* Evidence assessment
-* Legal decisions
-* Appropriate action
-
----
-
-# 46. Technology Stack
-
-## Frontend
-
-| Technology   | Purpose                         |
-| ------------ | ------------------------------- |
-| React        | User interface                  |
-| Vite         | Frontend build tooling          |
-| Tailwind CSS | UI styling                      |
-| Cytoscape.js | Transaction graph visualization |
-| Recharts     | Analytics and risk charts       |
-
----
-
-## Backend
-
-| Technology | Purpose                |
-| ---------- | ---------------------- |
-| Python     | Core backend language  |
-| FastAPI    | REST API               |
-| Pydantic   | Validation and schemas |
-| Web3.py    | Blockchain interaction |
-
----
-
-## Blockchain / Data APIs
-
-| Technology     | Purpose                          |
-| -------------- | -------------------------------- |
-| Blockscout API | Blockchain transaction data      |
-| Etherscan API  | Ethereum/blockchain intelligence |
-| Web3.py        | Direct blockchain interaction    |
-
-Potential future providers:
-
-```text
-Alchemy
-Infura
-QuickNode
-Moralis
-Covalent
-Bitquery
-Chainbase
-```
-
----
-
-## Data Processing
-
-```text
-Pandas
-NumPy
-```
-
----
-
-## Graph
-
-| Technology   | Purpose                        |
-| ------------ | ------------------------------ |
-| NetworkX     | Graph analysis and prototyping |
-| Neo4j        | Persistent graph database      |
-| Cytoscape.js | Frontend graph visualization   |
-
----
-
-## Entity / VASP Intelligence
-
-```text
-OpenSanctions
-FollowTheMoney
-OpenAleph
-Curated Exchange Address Intelligence
-```
-
----
-
-## Machine Learning
-
-```text
-scikit-learn
-XGBoost
-Isolation Forest
-```
-
----
-
-## Graph Machine Learning
-
-```text
-PyTorch Geometric
-GraphSAGE
-GCN
-GAT
-```
-
----
-
-# 47. Mandatory Multi-LLM Stack
-
-The platform requires all three models in the initial architecture.
-
-```text
-                  LLM ORCHESTRATOR
-                         |
-          +--------------+--------------+
-          |              |              |
-          v              v              v
-        QWEN          MISTRAL         LLAMA
-          |              |              |
-       ANALYST         REVIEWER       COPILOT
-```
-
-| Model   | Assigned Role                        |
-| ------- | ------------------------------------ |
-| Qwen    | Investigation Analyst                |
-| Mistral | Evidence Reviewer                    |
-| Llama   | Investigator Copilot / Report Writer |
-
-### LLM Serving
-
-```text
-Ollama
-or
-vLLM
-```
-
-### LLM Architecture Components
-
-```text
-LLM Orchestrator
-Prompt Templates
-Structured JSON Outputs
-Evidence-Grounded Context
-Output Validation
-Conflict Detection
-Model Metadata
-```
-
----
-
-# 48. Databases
-
-```text
+(PostgreSQL)
+(Neo4j)
+(Redis)
+(Object Storage)
+Cases / Users / Evidence
+Wallet / Transaction Graph
+Cache / Jobs
+Reports / Artifacts
 PostgreSQL
-Neo4j
-```
 
-### PostgreSQL
+Stores:
 
-```text
 Cases
 Investigators
 Wallets
@@ -2577,194 +1071,674 @@ Risk Scores
 LLM Outputs
 Reports
 Entity Matches
-```
+Audit Logs
 
-### Neo4j
+Neo4j
 
-```text
+Stores:
+
 Wallet Relationships
 Transaction Paths
 VASP Relationships
 Bridge Relationships
-Graph Clusters
-```
+Entity Clusters
+Graph Features
 
----
+Redis
 
-# 49. Reports
+Used for:
 
-```text
-ReportLab
-WeasyPrint
-```
+Caching
+Background job coordination
+Temporary state
+Rate limiting
 
-The reporting engine generates standardized investigation reports containing:
+26. Evidence Architecture
 
-```text
-Case Information
-       +
-Fund Flow
-       +
-Transaction Statistics
-       +
-Graph Analysis
-       +
-VASP Findings
-       +
-Risk Factors
-       +
-ML Signals
-       +
-Multi-LLM Analysis
-       +
-Evidence
-       +
-Uncertainties
-       +
-Recommendations
-```
+Evidence is treated as a first-class object.
 
----
+flowchart TD
 
-# 50. Datasets
-
-Potential datasets for model development and experimentation:
-
-| Dataset                  | Purpose                                          |
-| ------------------------ | ------------------------------------------------ |
-| Elliptic Bitcoin Dataset | Illicit transaction research                     |
-| Elliptic++               | Extended Bitcoin transaction/address analysis    |
-| BitcoinHeist             | Bitcoin address behavior research                |
-| AMLSim                   | Synthetic anti-money-laundering transaction data |
-
-Datasets should be used for model development and validation and should not be treated as direct proof regarding a real-world investigation.
-
----
-
-# 51. DevOps
-
-```text
-Docker
-Git
-GitHub
-```
-
-Recommended deployment structure:
-
-```text
-                   Docker Compose
-                         |
-       +-----------------+-----------------+
-       |                 |                 |
-       v                 v                 v
-   Frontend           Backend          Databases
-   React              FastAPI          PostgreSQL
-                                      Neo4j
+    A[Blockchain Data]
        |
-       +-----------------------------------+
-                                           |
-                                           v
-                                    LLM Services
-                                  Qwen / Mistral /
-                                      Llama
-```
+       v
+    B[Evidence Record]
 
----
+    B --> C[Transaction Hash]
+    B --> D[Block]
+    B --> E[Timestamp]
+    B --> F[Wallet]
+    B --> G[Amount]
+    B --> H[Provider]
+    B --> I[Entity Source]
+    B --> J[Detection Rule]
+    B --> K[ML Signal]
+    B --> L[LLM Finding]
 
-# 52. One-Line Architecture
+    B --> M[Evidence Store]
 
-```text
-React + Tailwind + Cytoscape.js
-        ->
-FastAPI + Web3.py
-        ->
-Blockscout / Etherscan
-        ->
-Pandas + NumPy
-        ->
-NetworkX + Neo4j
-        ->
-OpenSanctions / FollowTheMoney / OpenAleph
-        ->
-XGBoost + Isolation Forest + Graph ML
-        ->
-Rule Engine
-        ->
-Qwen + Mistral + Llama Multi-LLM Layer
-        ->
-Evidence Correlation + Risk Engine
-        ->
-Investigator Dashboard + Alerts
-        ->
-ReportLab / WeasyPrint
-```
+Example
+{
+  "evidence_id": "E001",
+  "type": "transaction",
+  "tx_hash": "0x123",
+  "block": 12345678,
+  "timestamp": "2026-08-29T01:24:32Z",
+  "from": "0xAAA",
+  "to": "0xBBB",
+  "amount": "4.2",
+  "source": "blockscout"
+}
 
----
 
-# 53. Final Architecture Summary
+Evidence should retain provenance.
 
-```text
-                 CRYPTO FRAUD CASE
-                         |
-                         v
-                  WALLET INTAKE
-                         |
-                         v
-                 BLOCKCHAIN APIs
-                         |
-                         v
-                  NORMALIZATION
-                         |
-                         v
-              TRANSACTION + GRAPH ENGINE
-                         |
-          +--------------+--------------+
-          |              |              |
-          v              v              v
-        RULES            ML        GRAPH ANALYSIS
-          |              |              |
-          +--------------+--------------+
-                         |
-                         v
-                 VASP / ENTITY INTEL
-                         |
-                         v
-                  EVIDENCE PACKAGE
-                         |
-                         v
-                  MULTIPLE LLMs
-             +-----------+-----------+
-             |           |           |
-           Qwen       Mistral      Llama
-          Analyst     Reviewer     Copilot
-             |           |           |
-             +-----------+-----------+
-                         |
-                         v
-                  CONSENSUS CHECK
-                         |
-                         v
-                   RISK ENGINE
-                         |
-              +----------+----------+
-              |                     |
-              v                     v
-       INVESTIGATOR UI            ALERTS
-              |
-              v
-        RECOMMENDATIONS
-              |
-              v
-           PDF REPORT
-```
+27. LLM Context Architecture
 
----
+The LLMs should never receive uncontrolled raw blockchain data when deterministic preprocessing can provide structured facts.
 
-# 54. Expected Investigation Output
+flowchart TD
 
-For every investigation, the platform should produce a structured result similar to:
+    A[Raw Blockchain Data]
+       |
+       v
+    B[Normalization]
+       |
+       v
+    C[Graph Analysis]
+       |
+       v
+    D[Feature Engineering]
+       |
+       v
+    E[Rules + ML]
+       |
+       v
+    F[VASP Intelligence]
+       |
+       v
+    G[Evidence Package]
+       |
+       v
+    H[LLM Orchestrator]
+       |
+       +--------+--------+
+       |        |        |
+       v        v        v
+     Qwen    Mistral   Llama
 
-```text
+
+The LLM context should contain:
+
+Case Information
+Relevant Transactions
+Important Graph Paths
+Risk Features
+Detected Patterns
+VASP Findings
+Evidence IDs
+Rule Results
+ML Signals
+Known Uncertainties
+
+
+The LLM should not independently calculate critical numerical values when the backend can calculate them deterministically.
+
+28. LLM Output Schema
+
+LLM responses should be structured.
+
+{
+  "summary": "Funds moved through multiple intermediary wallets.",
+  "key_findings": [
+    {
+      "finding": "Wallet B received funds from the reported wallet.",
+      "classification": "FACT",
+      "evidence_ids": [
+        "E001",
+        "E002"
+      ],
+      "confidence": "HIGH"
+    }
+  ],
+  "inferences": [
+    {
+      "statement": "Wallet C may be part of a layering path.",
+      "confidence": "MEDIUM",
+      "evidence_ids": [
+        "E004"
+      ]
+    }
+  ],
+  "recommendations": [
+    "Review Wallet C's subsequent transactions."
+  ],
+  "uncertainties": [
+    "Ownership of Wallet C has not been verified."
+  ]
+}
+
+Required Classification
+
+Every important LLM statement should be classified as:
+
+FACT
+INFERENCE
+RECOMMENDATION
+UNCERTAINTY
+
+29. API Architecture
+
+The production backend exposes REST APIs.
+
+Case APIs
+POST /api/v1/cases
+GET  /api/v1/cases/{case_id}
+PATCH /api/v1/cases/{case_id}
+
+Wallet APIs
+GET /api/v1/wallets/{address}
+GET /api/v1/wallets/{address}/transactions
+GET /api/v1/wallets/{address}/graph
+GET /api/v1/wallets/{address}/fund-flow
+GET /api/v1/wallets/{address}/risk
+GET /api/v1/wallets/{address}/entities
+
+Analysis APIs
+POST /api/v1/analyze/wallet
+POST /api/v1/analyze/trace
+POST /api/v1/analyze/risk
+POST /api/v1/analyze/llm
+
+Evidence APIs
+GET /api/v1/cases/{case_id}/evidence
+GET /api/v1/evidence/{evidence_id}
+
+Report APIs
+POST /api/v1/cases/{case_id}/report
+GET /api/v1/cases/{case_id}/report
+
+Monitoring APIs
+GET /api/v1/alerts
+GET /api/v1/alerts/{alert_id}
+PATCH /api/v1/alerts/{alert_id}
+
+
+FastAPI automatically provides OpenAPI-compatible documentation.
+
+30. Security Architecture
+
+Because the system processes potentially sensitive investigative information, production deployment requires strong security controls.
+
+flowchart TD
+
+    USER[Investigator]
+       |
+       v
+    AUTH[Authentication]
+       |
+       v
+    RBAC[Role-Based Access Control]
+       |
+       v
+    API[API Gateway]
+       |
+       v
+    VALIDATION[Input Validation]
+       |
+       v
+    SERVICES[Investigation Services]
+       |
+       +--------+--------+
+       |        |        |
+       v        v        v
+      DB       ML       LLM
+
+Security Controls
+Authentication
+OAuth2 / OIDC
+JWT
+MFA
+
+Authorization
+Role-Based Access Control
+Case-Level Permissions
+
+API Security
+Rate Limiting
+Input Validation
+Request Authentication
+API Logging
+
+Secrets
+
+Use:
+
+Environment Variables
+Secret Manager
+Vault
+Cloud Secret Manager
+
+
+Never commit API keys or credentials to Git.
+
+31. Production Deployment
+
+A production deployment can use containers.
+
+Load Balancer
+Frontend Container
+FastAPI Containers
+Background Workers
+(PostgreSQL)
+(Neo4j)
+(Redis)
+Blockchain Providers
+ML Services
+LLM Serving
+Qwen
+Mistral
+Llama
+Monitoring
+Containerized Services
+frontend
+backend
+worker
+postgres
+neo4j
+redis
+llm-service
+monitoring
+
+Development
+Docker Compose
+
+Production
+
+Possible deployment targets:
+
+Kubernetes
+Managed Container Platforms
+Cloud VMs
+Private Infrastructure
+On-Premise Infrastructure
+
+32. Observability & Reliability
+
+A production system should monitor every major service.
+
+flowchart LR
+
+    APP[Application]
+       |
+       v
+    METRICS[Metrics]
+       |
+       v
+    PROM[Prometheus]
+       |
+       v
+    GRAF[Grafana]
+
+
+Monitor:
+
+API latency
+Blockchain provider failures
+Transaction ingestion rate
+Queue length
+ML inference time
+LLM inference time
+Database latency
+Graph query latency
+Failed investigations
+Alert processing time
+
+Provider Failover
+Provider A
+    |
+    | failure
+    v
+Provider B
+    |
+    | failure
+    v
+Provider C
+
+
+The adapter layer should support provider fallback where practical.
+
+33. Repository Structure
+crypto-fraud-platform/
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── graph/
+│   │   ├── charts/
+│   │   ├── services/
+│   │   ├── hooks/
+│   │   └── types/
+│   │
+│   ├── package.json
+│   └── vite.config.ts
+│
+├── backend/
+│   └── app/
+│       ├── main.py
+│       │
+│       ├── api/
+│       │   ├── cases.py
+│       │   ├── wallets.py
+│       │   ├── transactions.py
+│       │   ├── analysis.py
+│       │   ├── reports.py
+│       │   └── alerts.py
+│       │
+│       ├── models/
+│       ├── schemas/
+│       ├── database/
+│       │
+│       ├── services/
+│       │   ├── blockchain/
+│       │   ├── normalization/
+│       │   ├── graph/
+│       │   ├── tracing/
+│       │   ├── patterns/
+│       │   ├── entity/
+│       │   ├── evidence/
+│       │   ├── risk/
+│       │   ├── llm/
+│       │   └── reports/
+│       │
+│       ├── ml/
+│       │   ├── features/
+│       │   ├── training/
+│       │   └── inference/
+│       │
+│       └── rules/
+│
+├── llm/
+│   ├── orchestrator/
+│   ├── prompts/
+│   ├── schemas/
+│   └── agents/
+│       ├── analyst/
+│       ├── evidence_reviewer/
+│       └── investigator_copilot/
+│
+├── graph/
+│   ├── algorithms/
+│   └── queries/
+│
+├── datasets/
+│
+├── reports/
+│
+├── tests/
+│
+├── docker/
+│
+├── docs/
+│
+├── docker-compose.yml
+├── requirements.txt
+├── .env.example
+└── README.md
+
+34. SIH MVP vs Production Architecture
+
+The architecture above represents the production target.
+
+The SIH prototype can implement a smaller version of the same architecture.
+
+Component	SIH MVP	Production
+Frontend	React + Vite	React + Vite
+Styling	Tailwind	Tailwind
+Backend	FastAPI	FastAPI
+Blockchain	Blockscout / Etherscan	Multi-provider adapters
+Direct Blockchain	Web3.py	Web3.py + nodes/indexers
+Database	PostgreSQL	PostgreSQL + optimized storage
+Graph	NetworkX	NetworkX + Neo4j
+Fund Tracing	Python	Distributed graph processing where required
+VASP	Curated/open datasets	Expanded entity intelligence
+ML	XGBoost + Isolation Forest	ML ensemble + Graph ML
+LLM	Qwen + Mistral + Llama	Multi-model serving infrastructure
+LLM Serving	Ollama	vLLM / optimized inference
+Monitoring	Polling	Streaming/event-driven
+Alerts	Basic	Real-time alert infrastructure
+Chains	Initial EVM	Multi-chain
+Bridge	Known contracts	Cross-chain correlation
+Reports	ReportLab	ReportLab + WeasyPrint
+Deployment	Docker Compose	Containers/Kubernetes
+Observability	Basic logs	Prometheus + Grafana
+Authentication	Basic	OIDC/OAuth2 + RBAC + MFA
+Key Principle
+
+The MVP is not a different product.
+
+It is a smaller implementation of the same production architecture.
+
+                    PRODUCTION PLATFORM
+                           |
+             +-------------+-------------+
+             |                           |
+             v                           v
+          SIH MVP                    FUTURE SCALE
+             |                           |
+        Core Pipeline              Advanced Services
+
+35. Development Roadmap
+Phase 1 — SIH MVP
+Wallet Intake
+      ↓
+Blockchain Retrieval
+      ↓
+Normalization
+      ↓
+Graph Construction
+      ↓
+Multi-Hop Tracing
+      ↓
+Pattern Detection
+      ↓
+VASP Matching
+      ↓
+Rules + ML
+      ↓
+Qwen + Mistral + Llama
+      ↓
+Evidence Validation
+      ↓
+Risk Score
+      ↓
+Dashboard
+      ↓
+PDF Report
+
+Phase 2 — Production Foundation
+Authentication
+      ↓
+RBAC
+      ↓
+PostgreSQL
+      ↓
+Neo4j
+      ↓
+Provider Adapters
+      ↓
+Background Workers
+      ↓
+Redis
+      ↓
+Monitoring
+      ↓
+Audit Logging
+
+Phase 3 — Multi-Chain
+Ethereum
+Polygon
+BNB Chain
+Bitcoin
+Solana
+      ↓
+Chain Adapters
+      ↓
+Normalized Model
+
+Phase 4 — Real-Time Intelligence
+Blockchain Events
+      ↓
+Streaming Layer
+      ↓
+Transaction Processor
+      ↓
+Pattern Detection
+      ↓
+Risk Engine
+      ↓
+WebSocket Alert
+
+Phase 5 — Advanced Intelligence
+Graph ML
+      +
+Advanced Entity Resolution
+      +
+Cross-Case Intelligence
+      +
+Cross-Chain Correlation
+      +
+Advanced LLM Evaluation
+
+36. Analytical Principles
+
+The platform must distinguish between risk indicators and legal conclusions.
+
+High Risk ≠ Criminal
+HIGH RISK
+    !=
+CRIMINAL / GUILTY
+
+VASP Interaction ≠ VASP Involvement
+VASP INTERACTION
+    !=
+VASP INVOLVEMENT
+
+Behavioral Similarity ≠ Ownership
+BEHAVIORAL SIMILARITY
+    !=
+VERIFIED OWNERSHIP
+
+Attribution Levels
+Level	Meaning
+VERIFIED	Supported by explicit attribution evidence
+INFERRED	Supported by behavioral or relational evidence
+UNCONFIRMED	Evidence is insufficient
+UNKNOWN	No meaningful attribution available
+
+The platform is an investigative intelligence and decision-support system.
+
+Human investigators remain responsible for:
+
+Verification.
+Evidence assessment.
+Interpretation.
+Legal decisions.
+Appropriate action.
+37. Example Investigation
+
+Suppose a victim reports:
+
+Wallet:
+0xABC123...
+
+Amount:
+₹5,00,000
+
+Fraud:
+Investment Fraud
+
+
+The platform discovers:
+
+Victim
+   |
+   | ₹5,00,000
+   v
+Wallet A
+   |
+   | 2 minutes
+   v
+Wallet B
+   |
+   +------> Wallet C
+   |           |
+   |           v
+   |        Wallet D
+   |
+   v
+Wallet E
+   |
+   v
+Exchange
+
+Analysis
+Transaction Count: 127
+
+Intermediaries: 6
+
+Rapid Movement: HIGH
+
+Splitting: MEDIUM
+
+Multiple Hops: HIGH
+
+VASP Interaction: YES
+
+Cross-Chain: DETECTED
+
+XGBoost Signal: 89%
+
+Anomaly Signal: 91%
+
+Rule Score: 82/100
+
+Multi-LLM Analysis
+Qwen:
+Identifies rapid multi-hop movement.
+
+Mistral:
+Confirms that the transaction evidence supports
+the movement pattern but does not establish
+ownership of intermediary wallets.
+
+Llama:
+Generates investigator-readable explanation
+and recommendations.
+
+Final Result
+Risk Score: 91 / 100
+
+Risk Level:
+HIGH
+
+Important Finding:
+Funds moved through multiple intermediary
+wallets before reaching a VASP-associated
+destination.
+
+Attribution:
+VASP association inferred/verified depending
+on available entity evidence.
+
+Uncertainty:
+Ownership of intermediary wallets is not verified.
+
+38. Expected Output
+
+Every investigation should generate a structured output.
+
 ====================================================
 CRYPTO FRAUD INVESTIGATION
 ====================================================
@@ -2805,7 +1779,7 @@ Cross-Chain: DETECTED
 VASP INTELLIGENCE
 ----------------------------------------------------
 Entity: Exchange X
-Attribution: VERIFIED / INFERRED
+Attribution: INFERRED / VERIFIED
 Distance: 3 hops
 Confidence: HIGH
 
@@ -2827,101 +1801,67 @@ HIGH
 MULTI-LLM ANALYSIS
 ----------------------------------------------------
 Qwen:
-Investigation Analysis Available
+Investigation analysis available.
 
 Mistral:
-Evidence Review Available
+Evidence review available.
 
 Llama:
-Investigator Explanation Available
+Investigator explanation available.
 
 CONSENSUS:
 Evidence supports the identified transaction path.
-VASP ownership attribution requires verification.
+
+UNCERTAINTIES:
+Ownership of intermediary wallets requires
+additional verification.
 
 RECOMMENDATIONS
 ----------------------------------------------------
-1. Review Wallet B and Wallet C.
+1. Review intermediary Wallet B and Wallet C.
 2. Verify VASP attribution.
-3. Preserve transaction evidence.
-4. Review related destination wallets.
+3. Preserve relevant transaction evidence.
+4. Review connected destination wallets.
 
 ====================================================
-```
 
----
-
-# 55. Expected Outcome
-
-The completed platform should allow an investigator to:
-
-1. Enter a reported wallet.
-2. Create an investigation case.
-3. Retrieve transactions.
-4. Normalize blockchain data.
-5. Trace funds across multiple hops.
-6. Visualize the transaction graph.
-7. Identify intermediary wallets.
-8. Detect suspicious transaction patterns.
-9. Detect cross-chain and bridge interactions where supported.
-10. Identify known or inferred VASP associations.
-11. Calculate rule-based risk.
-12. Calculate ML-based risk signals.
-13. Analyze graph-based risk.
-14. Run Qwen as the Investigation Analyst.
-15. Run Mistral as the Evidence Reviewer.
-16. Run Llama as the Investigator Copilot.
-17. Cross-check LLM conclusions.
-18. Link findings to evidence.
-19. Explain why a wallet/path was flagged.
-20. Generate evidence-backed recommendations.
-21. Monitor new transactions.
-22. Generate a standardized investigation report.
-
----
-
-# 56. Future Enhancements
-
-The architecture can be extended with:
-
-### Multi-Chain Intelligence
-
-```text
+39. Future Enhancements
+Multi-Chain Intelligence
 Ethereum
 Polygon
 BNB Chain
 Bitcoin
 Solana
-Additional Chains
-```
+Additional Networks
 
-### Advanced Graph ML
-
-```text
+Advanced Graph ML
 GraphSAGE
 GCN
 GAT
 Graph Transformers
-```
 
-### Streaming Architecture
-
-```text
+Real-Time Streaming
 Blockchain Events
-       |
-       v
-Kafka / Streaming Layer
-       |
-       v
-Real-Time Risk Engine
-       |
-       v
+       ↓
+Kafka
+       ↓
+Stream Processing
+       ↓
+Risk Engine
+       ↓
 WebSocket Alerts
-```
 
-### Advanced Cross-Chain Correlation
+Cross-Case Intelligence
+Case 1
+Shared Wallet
+Case 2
+Case 3
+Shared Entity
+Investigation Network
 
-```text
+This can help identify relationships across multiple investigations.
+
+Advanced Cross-Chain Correlation
 Chain A
    |
 Bridge
@@ -2931,193 +1871,412 @@ Chain B
 Bridge
    |
 Chain C
-```
 
-### Case Intelligence
+Investigator Collaboration
 
-```text
-Multiple Cases
-      |
-      v
-Shared Wallet Detection
-      |
-      v
-Shared Entity Detection
-      |
-      v
-Investigation Network
-```
+Future versions can support:
 
-### Future Law-Enforcement Integration
+Case Assignment
+Evidence Sharing
+Investigator Notes
+Case Comments
+Audit History
+Team Workflows
 
-The API-first architecture can support future integrations with systems such as:
+40. Project Philosophy
 
-```text
-NCRP / LEA workflows
-Case Management Systems
-VASP Coordination Systems
-Evidence Management Systems
-```
+The platform follows five core principles.
 
----
+Principle 1 — Evidence First
 
-# 57. Project Philosophy
+Important findings should be connected to supporting evidence.
 
-The platform follows five core principles:
+Finding
+   ↓
+Evidence
+   ↓
+Source
 
-```text
-                    +-------------------+
-                    |    INVESTIGATOR   |
-                    +---------+---------+
-                              |
-             +----------------+----------------+
-             |                |                |
-             v                v                v
-        EVIDENCE           ANALYTICS        AI
-             |                |                |
-             v                v                v
-        Blockchain         Rules + ML      Qwen/Mistral/Llama
-             |                |                |
-             +----------------+----------------+
-                              |
-                              v
-                     EXPLAINABLE OUTPUT
-                              |
-                              v
-                     HUMAN VERIFICATION
-```
+Principle 2 — Explainability
 
-### Principle 1 — Evidence First
+The platform should explain why a wallet or path received a particular risk signal.
 
-Important findings must be connected to evidence.
+Risk Score
+     ↓
+Risk Factors
+     ↓
+Evidence
 
-### Principle 2 — Explainability
+Principle 3 — Multi-Model Intelligence
 
-Risk scores should have understandable reasons.
+Different models perform different tasks.
 
-### Principle 3 — Multi-Model Intelligence
+Qwen
+  ↓
+Analyze
 
-Qwen, Mistral and Llama have specialized responsibilities.
+Mistral
+  ↓
+Review
 
-### Principle 4 — Human in the Loop
+Llama
+  ↓
+Explain / Recommend
+
+Principle 4 — Human in the Loop
+System
+   ↓
+Analysis
+   ↓
+Investigator
+   ↓
+Verification
+   ↓
+Decision
+
 
 The system supports investigators rather than replacing them.
 
-### Principle 5 — Fact vs Inference
+Principle 5 — Fact vs Inference
 
 The platform must clearly distinguish:
 
-```text
 VERIFIED FACT
-     |
-     v
+      ↓
 INFERENCE
-     |
-     v
+      ↓
 RECOMMENDATION
-     |
-     v
+      ↓
 UNCERTAINTY
-```
 
----
 
-# 58. Final Recommended Stack
+This is particularly important when AI models are involved.
 
-| Layer               | Technologies                               |
-| ------------------- | ------------------------------------------ |
-| Frontend            | React, Vite, Tailwind CSS                  |
-| Graph Visualization | Cytoscape.js                               |
-| Charts              | Recharts                                   |
-| Backend             | Python, FastAPI, Pydantic                  |
-| Blockchain          | Web3.py, Blockscout API, Etherscan API     |
-| Data Processing     | Pandas, NumPy                              |
-| Graph Analysis      | NetworkX                                   |
-| Graph Database      | Neo4j                                      |
-| Entity Intelligence | OpenSanctions, FollowTheMoney, OpenAleph   |
-| ML                  | scikit-learn, XGBoost, Isolation Forest    |
-| Graph ML            | PyTorch Geometric, GraphSAGE, GCN, GAT     |
-| LLM 1               | Qwen                                       |
-| LLM 2               | Mistral                                    |
-| LLM 3               | Llama                                      |
-| LLM Serving         | Ollama / vLLM                              |
-| LLM Orchestration   | Python orchestration layer                 |
-| Relational Database | PostgreSQL                                 |
-| Reports             | ReportLab, WeasyPrint                      |
-| Real-Time           | Polling / Event Listener / WebSockets      |
-| Datasets            | Elliptic, Elliptic++, BitcoinHeist, AMLSim |
-| DevOps              | Docker, Git, GitHub                        |
+41. Final Architecture Summary
+Victim Complaint
+Wallet Intake
+Case Management
+Blockchain Data Layer
+Normalization
+Transaction Engine
+Graph Engine
+Feature Engine
+NetworkX + Neo4j
+ML Engine
+Rule Engine
+Graph Risk
+ML Risk
+Rule Risk
+VASP / Entity Intelligence
+Evidence Package
+Qwen Analyst
+Mistral Reviewer
+Llama Copilot
+Consensus
+Evidence Correlation
+Final Risk Engine
+Investigator Dashboard
+Real-Time Alerts
+Recommendations
+PDF Report
+42. One-Line Production Architecture
+React + Vite + Tailwind
+        ↓
+FastAPI + Pydantic
+        ↓
+Blockchain Adapter Layer
+        ↓
+Web3.py + Blockscout + Etherscan + Additional Providers
+        ↓
+Pandas + NumPy
+        ↓
+NetworkX + Neo4j
+        ↓
+Fund Tracing + Pattern Detection
+        ↓
+OpenSanctions + FollowTheMoney + OpenAleph
+        ↓
+XGBoost + Isolation Forest + Graph ML
+        ↓
+Deterministic Rule Engine
+        ↓
+Qwen + Mistral + Llama
+        ↓
+Evidence Correlation
+        ↓
+Explainable Risk Engine
+        ↓
+React + Cytoscape.js + Recharts
+        ↓
+Alerts + Recommendations
+        ↓
+ReportLab / WeasyPrint
 
----
+43. Production Technology Map
+                    ┌──────────────────────┐
+                    │     INVESTIGATOR     │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │ React + Tailwind     │
+                    │ Cytoscape + Recharts │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │ FastAPI + Pydantic   │
+                    └──────────┬───────────┘
+                               │
+             ┌─────────────────┼─────────────────┐
+             ▼                 ▼                 ▼
+      ┌────────────┐    ┌────────────┐    ┌────────────┐
+      │ Blockchain │    │ PostgreSQL │    │   Neo4j    │
+      │   Layer    │    │            │    │   Graph    │
+      └─────┬──────┘    └────────────┘    └─────┬──────┘
+            │                                    │
+            ▼                                    ▼
+      Web3.py / APIs                       Graph Analysis
+            │                                    │
+            └────────────────┬───────────────────┘
+                             ▼
+                    ┌──────────────────────┐
+                    │ Feature Engineering  │
+                    │ Pandas + NumPy       │
+                    └──────────┬───────────┘
+                               │
+                ┌──────────────┼──────────────┐
+                ▼              ▼              ▼
+             XGBoost     Isolation Forest   Graph ML
+                │              │              │
+                └──────────────┼──────────────┘
+                               ▼
+                       ┌─────────────┐
+                       │ Rule Engine │
+                       └──────┬──────┘
+                              ▼
+                     Entity Intelligence
+                              │
+                              ▼
+                       Evidence Package
+                              │
+              ┌───────────────┼───────────────┐
+              ▼               ▼               ▼
+            Qwen           Mistral          Llama
+          ANALYST         REVIEWER         COPILOT
+              │               │               │
+              └───────────────┼───────────────┘
+                              ▼
+                     Evidence Correlation
+                              │
+                              ▼
+                       Final Risk Engine
+                              │
+                   ┌──────────┴──────────┐
+                   ▼                     ▼
+             Dashboard                Alerts
+                   │
+                   ▼
+          Recommendations + PDF
 
-# 59. Conclusion
+44. Final Outcome
 
-The **Real-Time Crypto Fraud Attribution & Investigation Platform** is designed as a complete blockchain investigation intelligence system rather than a simple blockchain explorer.
+The final platform transforms:
 
-Its architecture combines:
+RAW BLOCKCHAIN DATA
 
-```text
-                BLOCKCHAIN EVIDENCE
-                        +
-                TRANSACTION GRAPH
-                        +
-                  FUND TRACING
-                        +
-                VASP INTELLIGENCE
-                        +
-                 RULE ENGINE
-                        +
+
+into:
+
+STRUCTURED INVESTIGATIVE INTELLIGENCE
+
+
+through:
+
+Blockchain Data
+      +
+Transaction Graph
+      +
+Fund Tracing
+      +
+Pattern Detection
+      +
+Entity Intelligence
+      +
+Rules
+      +
+Machine Learning
+      +
+Multiple LLMs
+      +
+Evidence Correlation
+      +
+Risk Analysis
+
+
+The final investigator experience becomes:
+
+Reported Wallet
+      ↓
+Where did the money go?
+      ↓
+Which wallets were involved?
+      ↓
+What patterns occurred?
+      ↓
+Did funds reach a VASP?
+      ↓
+What evidence supports the findings?
+      ↓
+What is verified vs inferred?
+      ↓
+What is the risk level?
+      ↓
+What should be investigated next?
+      ↓
+Generate Evidence-Backed Report
+
+45. Project Positioning
+
+The platform should be positioned as:
+
+A production-oriented Crypto Fraud Investigation Intelligence Platform that combines blockchain analytics, transaction graph analysis, entity intelligence, machine learning, deterministic rules, and evidence-grounded multi-LLM reasoning to assist investigators in tracing and understanding cryptocurrency fraud.
+
+It is not intended to be:
+
+A simple blockchain explorer
+
+
+and it is not intended to be:
+
+An LLM chatbot making autonomous accusations
+
+
+Instead, it is:
+
+              EVIDENCE
+                  +
+              ANALYTICS
+                  +
               MACHINE LEARNING
-                        +
-                GRAPH ANALYTICS
-                        +
-               QWEN + MISTRAL
-                        +
-                    LLAMA
-                        +
-             EVIDENCE CORRELATION
-                        +
-                 RISK ENGINE
-                        |
-                        v
-              INVESTIGATOR OUTPUT
-                        |
-          +-------------+-------------+
-          |                           |
-          v                           v
-       DASHBOARD                    REPORT
-          |
-          v
-       ALERTS
-```
+                  +
+             MULTI-LLM AI
+                  +
+             HUMAN REVIEW
+                  ↓
+       INVESTIGATIVE INTELLIGENCE
 
-The resulting platform is positioned as a:
+46. License & Responsible Use
 
-> **Crypto Fraud Investigation Intelligence Platform**
+This project is intended for:
 
-rather than simply:
+Academic research.
+SIH/prototype development.
+Authorized cybersecurity investigations.
+Blockchain analytics research.
+Fraud investigation support.
 
-```text
-Blockchain Explorer
-```
+Production deployments must comply with applicable:
 
-or:
+Laws and regulations.
+Data protection requirements.
+Evidentiary standards.
+Organizational policies.
+Blockchain provider terms.
+Model licenses.
+Entity-intelligence data licenses.
 
-```text
-LLM Chatbot
-```
+The system should never automatically label a person or organization as criminal solely because a wallet receives a high risk score.
 
-The central objective is to transform raw blockchain transactions into **traceable, explainable, evidence-grounded investigative intelligence** while keeping the final decision with the human investigator.
+HIGH RISK
+    ≠
+GUILTY
 
----
 
-## License
+All important conclusions should remain subject to human verification.
 
-This project is intended for academic, research, prototype, and authorized investigative use.
+47. Summary
 
-Any production deployment should comply with applicable laws, regulations, data-protection requirements, evidentiary standards, and organizational policies.
+The production-grade platform follows this architecture:
 
-```
+VICTIM COMPLAINT
+       ↓
+WALLET INTAKE
+       ↓
+CASE MANAGEMENT
+       ↓
+BLOCKCHAIN DATA
+       ↓
+NORMALIZATION
+       ↓
+TRANSACTION GRAPH
+       ↓
+MULTI-HOP FUND TRACING
+       ↓
+SUSPICIOUS PATTERN DETECTION
+       ↓
+VASP / ENTITY INTELLIGENCE
+       ↓
+ML + RULE ENGINE
+       ↓
+QWEN + MISTRAL + LLAMA
+       ↓
+EVIDENCE CORRELATION
+       ↓
+EXPLAINABLE RISK ENGINE
+       ↓
+INVESTIGATOR DASHBOARD
+       ↓
+REAL-TIME ALERTS
+       ↓
+RECOMMENDATIONS
+       ↓
+EVIDENCE-BACKED PDF REPORT
 
-This version is structured so you can **copy the entire content directly into `README.md`** and use it as the main GitHub documentation for the SIH project.
-```
+Core Technology Stack
+Frontend:
+React + Vite + Tailwind + Cytoscape.js + Recharts
+
+Backend:
+Python + FastAPI + Pydantic
+
+Blockchain:
+Web3.py + Blockchain Provider Adapters
+
+Data:
+Pandas + NumPy
+
+Graph:
+NetworkX + Neo4j
+
+Entity Intelligence:
+OpenSanctions + FollowTheMoney + OpenAleph
+
+Machine Learning:
+scikit-learn + XGBoost + Isolation Forest
+
+Graph ML:
+PyTorch Geometric
+
+LLM:
+Qwen + Mistral + Llama
+
+LLM Serving:
+Ollama / vLLM
+
+Database:
+PostgreSQL + Neo4j + Redis
+
+Reports:
+ReportLab + WeasyPrint
+
+Infrastructure:
+Docker + CI/CD + Monitoring
+
+Observability:
+Prometheus + Grafana
+
+
+The central philosophy is simple: collect the evidence, understand the money flow, identify meaningful patterns, use AI to assist analysis, verify AI claims against evidence, and give the investigator an explainable result rather than an unsupported conclusion.
+
+This version is suitable as the main technical README.md, while your PPT can extract the architecture diagrams, technology map, and the MVP-vs-production table from it.
