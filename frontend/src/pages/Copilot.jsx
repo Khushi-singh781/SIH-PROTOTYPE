@@ -1,10 +1,10 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { 
   MessageSquare, Send, FileText, Download, 
   Shield, CheckCircle, AlertCircle, Zap,
   User, Bot, Sparkles, Lock, Clock,
-  BarChart3, FileDown, Share2
+  BarChart3, FileDown, Share2, XCircle
 } from 'lucide-react'
 
 const mockMessages = [
@@ -42,7 +42,12 @@ const Copilot = () => {
   const [input, setInput] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [showReportModal, setShowReportModal] = useState(false)
+  const [downloadProgress, setDownloadProgress] = useState(0)
   const chatEndRef = useRef(null)
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
   const handleSend = () => {
     if (!input.trim()) return
@@ -56,7 +61,6 @@ const Copilot = () => {
     setMessages([...messages, newMessage])
     setInput('')
     
-    // Simulate bot response
     setIsGenerating(true)
     setTimeout(() => {
       const botResponse = {
@@ -76,16 +80,73 @@ const Copilot = () => {
 
   const handleGenerateReport = () => {
     setShowReportModal(true)
+    setDownloadProgress(0)
   }
 
   const handleDownloadReport = () => {
     setIsGenerating(true)
-    setTimeout(() => {
-      setIsGenerating(false)
-      setShowReportModal(false)
-      // In a real app, this would trigger PDF download
-      alert('Report downloaded successfully! (SHA-256: 7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069)')
-    }, 2000)
+    setDownloadProgress(0)
+    
+    // Simulate download progress
+    const interval = setInterval(() => {
+      setDownloadProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval)
+          setIsGenerating(false)
+          setShowReportModal(false)
+          
+          // Create a simple text file download
+          const reportContent = `
+ChainGuard Investigation Report
+===============================
+Case ID: #2025-1047
+Status: High Risk
+Generated: ${new Date().toLocaleString()}
+
+Summary
+-------
+Total Amount Lost: ₹18,72,000
+Tracing Confidence: 87%
+Wallets Identified: 37
+Clusters Found: 4
+
+AI Analysis Results
+-------------------
+Qwen: SUPPORTED (87% confidence)
+Mistral: UNSUPPORTED (62% confidence)
+Llama: RECOMMENDED (73% confidence)
+
+Evidence Summary
+----------------
+- 14 unrelated sources verified
+- 91% funds moved in 8 mins
+- 6 splitter wallets identified
+- Connected to previous scam reports
+
+SHA-256 Integrity Seal
+----------------------
+7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069
+
+This report is digitally signed and verified.
+          `.trim()
+
+          const blob = new Blob([reportContent], { type: 'text/plain' })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `Chainguard_Report_${Date.now()}.txt`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+          
+          alert('✅ Report downloaded successfully!\n\nSHA-256: 7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069')
+          
+          return 100
+        }
+        return prev + 10
+      })
+    }, 200)
   }
 
   return (
@@ -322,6 +383,21 @@ const Copilot = () => {
                 <Lock size={16} className="text-emerald-400" />
               </div>
 
+              {downloadProgress > 0 && downloadProgress < 100 && (
+                <div className="w-full">
+                  <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+                    <span>Generating report...</span>
+                    <span>{downloadProgress}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-dark-border rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-accent-blue rounded-full transition-all duration-300"
+                      style={{ width: `${downloadProgress}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+
               <button
                 onClick={handleDownloadReport}
                 disabled={isGenerating}
@@ -330,7 +406,7 @@ const Copilot = () => {
                 {isGenerating ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Generating...
+                    {downloadProgress < 100 ? 'Generating...' : 'Downloading...'}
                   </>
                 ) : (
                   <>

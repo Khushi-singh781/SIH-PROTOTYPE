@@ -1,7 +1,10 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Brain, TrendingUp, TrendingDown, AlertCircle, CheckCircle, XCircle, BarChart3 } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts'
+import { 
+  Brain, TrendingUp, TrendingDown, AlertCircle, 
+  CheckCircle, XCircle, BarChart3, Zap
+} from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, Cell } from 'recharts'
 
 const mockModels = [
   {
@@ -56,7 +59,15 @@ const consensusData = [
 
 const AIAnalysis = () => {
   const [selectedModel, setSelectedModel] = useState('qwen')
-  const [isComparing, setIsComparing] = useState(false)
+
+  const getTimelineData = () => {
+    return mockModels[0].timeline.map((_, idx) => ({
+      day: `Day ${idx + 1}`,
+      qwen: mockModels[0].timeline[idx],
+      mistral: mockModels[1].timeline[idx],
+      llama: mockModels[2].timeline[idx]
+    }))
+  }
 
   return (
     <motion.div
@@ -69,11 +80,9 @@ const AIAnalysis = () => {
           <h1 className="text-2xl font-bold">AI Analysis Face-Off</h1>
           <p className="text-sm text-gray-400 mt-1">Real-time comparison of multiple AI models</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-            <AlertCircle size={16} className="text-amber-400" />
-            <span className="text-xs text-amber-400">Disagreement Detected</span>
-          </div>
+        <div className="flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+          <AlertCircle size={16} className="text-amber-400" />
+          <span className="text-xs text-amber-400">Disagreement Detected</span>
         </div>
       </div>
 
@@ -134,66 +143,70 @@ const AIAnalysis = () => {
         {/* Evidence Timeline */}
         <div className="glass-card p-6">
           <h3 className="text-lg font-semibold mb-4">Evidence Timeline</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={mockModels[0].timeline.map((_, idx) => ({
-              day: `Day ${idx + 1}`,
-              qwen: mockModels[0].timeline[idx],
-              mistral: mockModels[1].timeline[idx],
-              llama: mockModels[2].timeline[idx]
-            }))}>
-              <XAxis dataKey="day" stroke="#6B7280" fontSize={10} />
-              <YAxis stroke="#6B7280" fontSize={10} domain={[40, 100]} />
-              <Tooltip />
-              <Line type="monotone" dataKey="qwen" stroke="#3B82F6" strokeWidth={2} />
-              <Line type="monotone" dataKey="mistral" stroke="#8B5CF6" strokeWidth={2} />
-              <Line type="monotone" dataKey="llama" stroke="#10B981" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
+          <div className="w-full h-[200px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={getTimelineData()}>
+                <XAxis dataKey="day" stroke="#6B7280" fontSize={10} />
+                <YAxis stroke="#6B7280" fontSize={10} domain={[40, 100]} />
+                <Tooltip contentStyle={{ backgroundColor: '#0F172A', border: '1px solid #1E293B' }} />
+                <Line type="monotone" dataKey="qwen" stroke="#3B82F6" strokeWidth={2} />
+                <Line type="monotone" dataKey="mistral" stroke="#8B5CF6" strokeWidth={2} />
+                <Line type="monotone" dataKey="llama" stroke="#10B981" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Evidence Details */}
         <div className="glass-card p-6">
           <h3 className="text-lg font-semibold mb-4">Key Evidence Analysis</h3>
-          {mockModels.find(m => m.id === selectedModel)?.evidence.map((item, idx) => (
-            <div key={idx} className="flex items-start gap-3 mb-3 p-3 bg-dark-bg rounded-lg">
-              <div className="w-6 h-6 rounded-full bg-accent-blue/10 flex items-center justify-center flex-shrink-0">
-                <span className="text-xs text-accent-blue font-bold">{idx + 1}</span>
-              </div>
-              <div>
-                <p className="text-sm text-gray-300">{item}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="w-16 h-1 bg-dark-border rounded-full overflow-hidden">
-                    <div 
-                      className="h-full rounded-full"
-                      style={{ 
-                        width: `${70 + Math.random() * 25}%`,
-                        backgroundColor: mockModels.find(m => m.id === selectedModel)?.color
-                      }}
-                    ></div>
+          <div className="space-y-3">
+            {mockModels.find(m => m.id === selectedModel)?.evidence.map((item, idx) => {
+              const randomStrength = 70 + Math.floor(Math.random() * 25)
+              return (
+                <div key={idx} className="flex items-start gap-3 p-3 bg-dark-bg rounded-lg">
+                  <div className="w-6 h-6 rounded-full bg-accent-blue/10 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs text-accent-blue font-bold">{idx + 1}</span>
                   </div>
-                  <span className="text-xs text-gray-500">Strong</span>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-300">{item}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex-1 h-1 bg-dark-border rounded-full overflow-hidden">
+                        <div 
+                          className="h-full rounded-full transition-all"
+                          style={{ 
+                            width: `${randomStrength}%`,
+                            backgroundColor: mockModels.find(m => m.id === selectedModel)?.color
+                          }}
+                        ></div>
+                      </div>
+                      <span className="text-xs text-gray-500">{randomStrength}%</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              )
+            })}
+          </div>
         </div>
       </div>
 
       {/* Consensus Bar Chart */}
       <div className="glass-card p-6">
         <h3 className="text-lg font-semibold mb-4">Model Support Comparison</h3>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={consensusData}>
-            <XAxis dataKey="name" stroke="#6B7280" fontSize={12} />
-            <YAxis stroke="#6B7280" fontSize={12} domain={[0, 100]} />
-            <Tooltip />
-            <Bar dataKey="support" radius={[4, 4, 0, 0]}>
-              {consensusData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <div className="w-full h-[200px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={consensusData}>
+              <XAxis dataKey="name" stroke="#6B7280" fontSize={12} />
+              <YAxis stroke="#6B7280" fontSize={12} domain={[0, 100]} />
+              <Tooltip contentStyle={{ backgroundColor: '#0F172A', border: '1px solid #1E293B' }} />
+              <Bar dataKey="support" radius={[4, 4, 0, 0]}>
+                {consensusData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </motion.div>
   )

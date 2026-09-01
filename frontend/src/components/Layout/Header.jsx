@@ -1,10 +1,16 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import { Bell, User, Shield, Clock } from 'lucide-react'
+import { Bell, User, Shield, Clock, Moon, Sun } from 'lucide-react'
 
 const Header = () => {
   const { user } = useAuth()
-  
+  const [isDark, setIsDark] = useState(true)
+
+  const toggleTheme = () => {
+    setIsDark(!isDark)
+    document.documentElement.classList.toggle('dark')
+  }
+
   return (
     <header className="bg-dark-card border-b border-dark-border px-6 py-4">
       <div className="flex items-center justify-between">
@@ -20,6 +26,17 @@ const Header = () => {
         </div>
         
         <div className="flex items-center gap-6">
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-lg hover:bg-dark-bg transition-all"
+          >
+            {isDark ? (
+              <Sun size={18} className="text-gray-400 hover:text-gray-200" />
+            ) : (
+              <Moon size={18} className="text-gray-400 hover:text-gray-200" />
+            )}
+          </button>
+
           <div className="flex items-center gap-2">
             <Shield size={16} className="text-accent-blue" />
             <span className="text-sm text-gray-400">{user?.role}</span>
