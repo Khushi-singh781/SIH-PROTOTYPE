@@ -1,10 +1,9 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { 
-  Brain, TrendingUp, TrendingDown, AlertCircle, 
-  CheckCircle, XCircle, BarChart3, Zap
+  Brain, AlertCircle, CheckCircle, XCircle
 } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, Cell } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, Cell, PieChart, Pie } from 'recharts'
 
 const mockModels = [
   {
@@ -51,6 +50,23 @@ const mockModels = [
   }
 ]
 
+// Confidence Distribution Data
+const confidenceDistribution = [
+  { name: 'High Confidence', value: 5, color: '#10B981' },
+  { name: 'Medium Confidence', value: 3, color: '#F59E0B' },
+  { name: 'Low Confidence', value: 3, color: '#EF4444' }
+]
+
+// Role Distribution Data
+const roleDistribution = [
+  { name: 'Collectors', value: 2, color: '#EF4444' },
+  { name: 'Mules', value: 8, color: '#F59E0B' },
+  { name: 'Splitters', value: 6, color: '#8B5CF6' },
+  { name: 'Consolidators', value: 3, color: '#10B981' },
+  { name: 'Bridges', value: 2, color: '#3B82F6' },
+  { name: 'Exit Points', value: 1, color: '#F97316' }
+]
+
 const consensusData = [
   { name: 'Qwen', support: 87, color: '#3B82F6' },
   { name: 'Mistral', support: 38, color: '#8B5CF6' },
@@ -69,6 +85,15 @@ const AIAnalysis = () => {
     }))
   }
 
+  const getConsensusLevel = () => {
+    const avg = consensusData.reduce((sum, d) => sum + d.support, 0) / consensusData.length
+    if (avg >= 70) return { level: 'Strong Consensus', color: 'text-emerald-400' }
+    if (avg >= 50) return { level: 'Moderate Consensus', color: 'text-amber-400' }
+    return { level: 'Low Consensus', color: 'text-rose-400' }
+  }
+
+  const consensus = getConsensusLevel()
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -80,13 +105,13 @@ const AIAnalysis = () => {
           <h1 className="text-2xl font-bold">AI Analysis Face-Off</h1>
           <p className="text-sm text-gray-400 mt-1">Real-time comparison of multiple AI models</p>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-          <AlertCircle size={16} className="text-amber-400" />
-          <span className="text-xs text-amber-400">Disagreement Detected</span>
+        <div className={`flex items-center gap-2 px-3 py-1 border rounded-lg ${consensus.color}`}>
+          <AlertCircle size={16} className={consensus.color} />
+          <span className={`text-xs ${consensus.color}`}>Consensus: {consensus.level}</span>
         </div>
       </div>
 
-      {/* Consensus Indicator */}
+      {/* Model Cards */}
       <div className="glass-card p-6">
         <h3 className="text-lg font-semibold mb-4">Model Consensus Indicator</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -138,7 +163,68 @@ const AIAnalysis = () => {
         </div>
       </div>
 
-      {/* Detailed Analysis */}
+      {/* Confidence Distribution & Role Distribution Graphs */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Confidence Distribution */}
+        <div className="glass-card p-6">
+          <h3 className="text-lg font-semibold mb-4">Confidence Distribution</h3>
+          <div className="w-full h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={confidenceDistribution}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={true}
+                  label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
+                  outerRadius={80}
+                  dataKey="value"
+                >
+                  {confidenceDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ backgroundColor: '#0F172A', border: '1px solid #1E293B' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex justify-center gap-4 mt-2">
+            {confidenceDistribution.map((item) => (
+              <div key={item.name} className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }}></div>
+                <span className="text-xs text-gray-400">{item.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Role Distribution */}
+        <div className="glass-card p-6">
+          <h3 className="text-lg font-semibold mb-4">Role Distribution</h3>
+          <div className="w-full h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={roleDistribution} layout="vertical" margin={{ left: 80 }}>
+                <XAxis type="number" stroke="#6B7280" fontSize={10} />
+                <YAxis 
+                  type="category" 
+                  dataKey="name" 
+                  stroke="#6B7280" 
+                  fontSize={10}
+                  tick={{ fill: '#9CA3AF' }}
+                />
+                <Tooltip contentStyle={{ backgroundColor: '#0F172A', border: '1px solid #1E293B' }} />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                  {roleDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Evidence Timeline & Details */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Evidence Timeline */}
         <div className="glass-card p-6">
@@ -149,63 +235,31 @@ const AIAnalysis = () => {
                 <XAxis dataKey="day" stroke="#6B7280" fontSize={10} />
                 <YAxis stroke="#6B7280" fontSize={10} domain={[40, 100]} />
                 <Tooltip contentStyle={{ backgroundColor: '#0F172A', border: '1px solid #1E293B' }} />
-                <Line type="monotone" dataKey="qwen" stroke="#3B82F6" strokeWidth={2} />
-                <Line type="monotone" dataKey="mistral" stroke="#8B5CF6" strokeWidth={2} />
-                <Line type="monotone" dataKey="llama" stroke="#10B981" strokeWidth={2} />
+                <Line type="monotone" dataKey="qwen" stroke="#3B82F6" strokeWidth={2} name="Qwen" />
+                <Line type="monotone" dataKey="mistral" stroke="#8B5CF6" strokeWidth={2} name="Mistral" />
+                <Line type="monotone" dataKey="llama" stroke="#10B981" strokeWidth={2} name="Llama" />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Evidence Details */}
+        {/* Model Support Comparison */}
         <div className="glass-card p-6">
-          <h3 className="text-lg font-semibold mb-4">Key Evidence Analysis</h3>
-          <div className="space-y-3">
-            {mockModels.find(m => m.id === selectedModel)?.evidence.map((item, idx) => {
-              const randomStrength = 70 + Math.floor(Math.random() * 25)
-              return (
-                <div key={idx} className="flex items-start gap-3 p-3 bg-dark-bg rounded-lg">
-                  <div className="w-6 h-6 rounded-full bg-accent-blue/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs text-accent-blue font-bold">{idx + 1}</span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-300">{item}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex-1 h-1 bg-dark-border rounded-full overflow-hidden">
-                        <div 
-                          className="h-full rounded-full transition-all"
-                          style={{ 
-                            width: `${randomStrength}%`,
-                            backgroundColor: mockModels.find(m => m.id === selectedModel)?.color
-                          }}
-                        ></div>
-                      </div>
-                      <span className="text-xs text-gray-500">{randomStrength}%</span>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
+          <h3 className="text-lg font-semibold mb-4">Model Support Comparison</h3>
+          <div className="w-full h-[200px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={consensusData}>
+                <XAxis dataKey="name" stroke="#6B7280" fontSize={12} />
+                <YAxis stroke="#6B7280" fontSize={12} domain={[0, 100]} />
+                <Tooltip contentStyle={{ backgroundColor: '#0F172A', border: '1px solid #1E293B' }} />
+                <Bar dataKey="support" radius={[4, 4, 0, 0]} label={{ position: 'top', fill: '#9CA3AF', fontSize: 12 }}>
+                  {consensusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-        </div>
-      </div>
-
-      {/* Consensus Bar Chart */}
-      <div className="glass-card p-6">
-        <h3 className="text-lg font-semibold mb-4">Model Support Comparison</h3>
-        <div className="w-full h-[200px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={consensusData}>
-              <XAxis dataKey="name" stroke="#6B7280" fontSize={12} />
-              <YAxis stroke="#6B7280" fontSize={12} domain={[0, 100]} />
-              <Tooltip contentStyle={{ backgroundColor: '#0F172A', border: '1px solid #1E293B' }} />
-              <Bar dataKey="support" radius={[4, 4, 0, 0]}>
-                {consensusData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
         </div>
       </div>
     </motion.div>

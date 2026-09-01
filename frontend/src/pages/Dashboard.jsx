@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { 
   TrendingUp, Wallet, Users, Activity, Play, Pause,
-  FileDown, Shield, AlertTriangle
+  FileDown, Shield, XCircle, Download
 } from 'lucide-react'
 
 const mockCaseData = {
@@ -37,6 +37,24 @@ const Dashboard = () => {
   const [showReportModal, setShowReportModal] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
   const [downloadProgress, setDownloadProgress] = useState(0)
+  const [currentStep, setCurrentStep] = useState(0)
+
+  // Auto-play money flow trace
+  React.useEffect(() => {
+    let interval = null
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setCurrentStep(prev => {
+          if (prev >= mockTransactions.length - 1) {
+            setIsPlaying(false)
+            return prev
+          }
+          return prev + 1
+        })
+      }, 1500)
+    }
+    return () => clearInterval(interval)
+  }, [isPlaying])
 
   const handleExportReport = () => {
     setShowReportModal(true)
@@ -106,6 +124,13 @@ This report is digitally signed and verified.
     }, 150)
   }
 
+  const handlePlayPause = () => {
+    if (currentStep >= mockTransactions.length - 1) {
+      setCurrentStep(0)
+    }
+    setIsPlaying(!isPlaying)
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -155,7 +180,7 @@ This report is digitally signed and verified.
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Money Flow Trace</h3>
           <button
-            onClick={() => setIsPlaying(!isPlaying)}
+            onClick={handlePlayPause}
             className="p-2 rounded-lg hover:bg-dark-bg transition-all"
           >
             {isPlaying ? <Pause size={20} /> : <Play size={20} />}
@@ -164,23 +189,27 @@ This report is digitally signed and verified.
         
         <div className="flex items-center justify-between gap-2 overflow-x-auto py-4">
           {mockTransactions.map((tx, idx) => {
-            let bgColor = 'bg-emerald-500/20 text-emerald-400'
-            if (tx.type === 'theft') bgColor = 'bg-rose-500/20 text-rose-400'
-            else if (tx.type === 'transfer') bgColor = 'bg-amber-500/20 text-amber-400'
-            else if (tx.type === 'split') bgColor = 'bg-purple-500/20 text-purple-400'
+            const isActive = idx <= currentStep
+            let bgColor = 'bg-dark-border text-gray-500'
+            if (isActive) {
+              if (tx.type === 'theft') bgColor = 'bg-rose-500/20 text-rose-400'
+              else if (tx.type === 'transfer') bgColor = 'bg-amber-500/20 text-amber-400'
+              else if (tx.type === 'split') bgColor = 'bg-purple-500/20 text-purple-400'
+              else if (tx.type === 'exchange') bgColor = 'bg-emerald-500/20 text-emerald-400'
+            }
             
             return (
               <React.Fragment key={idx}>
                 <div className="flex flex-col items-center min-w-[80px]">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold ${bgColor}`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold transition-all ${bgColor}`}>
                     {tx.amount/1000}k
                   </div>
-                  <span className="text-xs text-gray-400 mt-1">{tx.from}</span>
-                  <span className="text-[10px] text-gray-500">→ {tx.to}</span>
-                  <span className="text-[10px] text-gray-500">{tx.time}</span>
+                  <span className={`text-xs mt-1 transition-all ${isActive ? 'text-gray-200' : 'text-gray-500'}`}>{tx.from}</span>
+                  <span className={`text-[10px] transition-all ${isActive ? 'text-gray-400' : 'text-gray-600'}`}>→ {tx.to}</span>
+                  <span className={`text-[10px] transition-all ${isActive ? 'text-gray-400' : 'text-gray-600'}`}>{tx.time}</span>
                 </div>
                 {idx < mockTransactions.length - 1 && (
-                  <div className="flex-1 h-[2px] bg-gradient-to-r from-rose-400 to-emerald-400 min-w-[20px]"></div>
+                  <div className={`flex-1 h-[2px] min-w-[20px] transition-all ${isActive ? 'bg-gradient-to-r from-rose-400 to-emerald-400' : 'bg-dark-border'}`}></div>
                 )}
               </React.Fragment>
             )
