@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { 
   MessageSquare, Send, FileText, Download, 
-  Shield, CheckCircle, AlertCircle, Zap,
+  Shield, CheckCircle, AlertCircle,
   User, Bot, Sparkles, Lock, Clock,
-  BarChart3, FileDown, Share2, XCircle
+  BarChart3, FileDown, XCircle
 } from 'lucide-react'
 
 const mockMessages = [
@@ -43,6 +43,7 @@ const Copilot = () => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showReportModal, setShowReportModal] = useState(false)
   const [downloadProgress, setDownloadProgress] = useState(0)
+  const [isDownloading, setIsDownloading] = useState(false)
   const chatEndRef = useRef(null)
 
   useEffect(() => {
@@ -81,10 +82,11 @@ const Copilot = () => {
   const handleGenerateReport = () => {
     setShowReportModal(true)
     setDownloadProgress(0)
+    setIsDownloading(false)
   }
 
   const handleDownloadReport = () => {
-    setIsGenerating(true)
+    setIsDownloading(true)
     setDownloadProgress(0)
     
     // Simulate download progress
@@ -92,8 +94,7 @@ const Copilot = () => {
       setDownloadProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval)
-          setIsGenerating(false)
-          setShowReportModal(false)
+          setIsDownloading(false)
           
           // Create a simple text file download
           const reportContent = `
@@ -141,6 +142,8 @@ This report is digitally signed and verified.
           URL.revokeObjectURL(url)
           
           alert('✅ Report downloaded successfully!\n\nSHA-256: 7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069')
+          
+          setShowReportModal(false)
           
           return 100
         }
@@ -364,7 +367,7 @@ This report is digitally signed and verified.
 
               <div className="p-4 bg-dark-bg rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
-                  <Brain size={16} className="text-accent-blue" />
+                  <Sparkles size={16} className="text-accent-blue" />
                   <span className="font-semibold">AI Face-Off Summary</span>
                 </div>
                 <div className="space-y-1 text-sm">
@@ -378,12 +381,12 @@ This report is digitally signed and verified.
                 <Shield size={20} className="text-emerald-400" />
                 <div className="flex-1">
                   <p className="text-sm text-emerald-400 font-semibold">SHA-256 Integrity Seal</p>
-                  <p className="text-xs font-mono text-gray-400">7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069</p>
+                  <p className="text-xs font-mono text-gray-400 break-all">7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069</p>
                 </div>
                 <Lock size={16} className="text-emerald-400" />
               </div>
 
-              {downloadProgress > 0 && downloadProgress < 100 && (
+              {isDownloading && downloadProgress > 0 && downloadProgress < 100 && (
                 <div className="w-full">
                   <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
                     <span>Generating report...</span>
@@ -400,10 +403,10 @@ This report is digitally signed and verified.
 
               <button
                 onClick={handleDownloadReport}
-                disabled={isGenerating}
+                disabled={isDownloading}
                 className="w-full bg-accent-blue hover:bg-accent-blue/80 text-white font-semibold py-2 px-4 rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {isGenerating ? (
+                {isDownloading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     {downloadProgress < 100 ? 'Generating...' : 'Downloading...'}

@@ -1,6 +1,9 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { TrendingUp, Wallet, Users, Activity, Play, Pause } from 'lucide-react'
+import { 
+  TrendingUp, Wallet, Users, Activity, Play, Pause,
+  FileDown, Shield, AlertTriangle
+} from 'lucide-react'
 
 const mockCaseData = {
   caseId: '#2025-1047',
@@ -31,6 +34,77 @@ const mockTransactions = [
 
 const Dashboard = () => {
   const [isPlaying, setIsPlaying] = useState(false)
+  const [showReportModal, setShowReportModal] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
+  const [downloadProgress, setDownloadProgress] = useState(0)
+
+  const handleExportReport = () => {
+    setShowReportModal(true)
+  }
+
+  const handleDownloadReport = () => {
+    setIsDownloading(true)
+    setDownloadProgress(0)
+    
+    const interval = setInterval(() => {
+      setDownloadProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval)
+          setIsDownloading(false)
+          
+          const reportContent = `
+ChainGuard Investigation Report - Dashboard Export
+==================================================
+Case ID: ${mockCaseData.caseId}
+Status: ${mockCaseData.status}
+Generated: ${new Date().toLocaleString()}
+
+Metrics Summary
+---------------
+Total Amount Lost: ₹${mockCaseData.metrics.totalLost.toLocaleString()}
+Tracing Confidence: ${mockCaseData.metrics.confidence}%
+Wallets Identified: ${mockCaseData.metrics.walletsIdentified}
+Clusters Found: ${mockCaseData.metrics.clustersFound}
+
+Network Role Distribution
+-------------------------
+Collectors: ${mockCaseData.networkSummary.collectors}
+Mules: ${mockCaseData.networkSummary.mules}
+Splitters: ${mockCaseData.networkSummary.splitters}
+Consolidators: ${mockCaseData.networkSummary.consolidators}
+Bridges: ${mockCaseData.networkSummary.bridges}
+Exit Points: ${mockCaseData.networkSummary.exitPoints}
+
+Transaction Flow
+----------------
+${mockTransactions.map(tx => `${tx.time}: ${tx.from} → ${tx.to} (₹${tx.amount.toLocaleString()})`).join('\n')}
+
+SHA-256 Integrity Seal
+----------------------
+7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069
+
+This report is digitally signed and verified.
+          `.trim()
+
+          const blob = new Blob([reportContent], { type: 'text/plain' })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `Chainguard_Dashboard_Report_${Date.now()}.txt`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+          
+          alert('✅ Dashboard report downloaded successfully!')
+          setShowReportModal(false)
+          
+          return 100
+        }
+        return prev + 10
+      })
+    }, 150)
+  }
 
   return (
     <motion.div
@@ -49,8 +123,12 @@ const Dashboard = () => {
             </span>
           </div>
         </div>
-        <button className="px-4 py-2 bg-accent-blue/10 text-accent-blue rounded-lg text-sm hover:bg-accent-blue/20 transition-all">
-          Export Report
+        <button
+          onClick={handleExportReport}
+          className="flex items-center gap-2 px-4 py-2 bg-accent-blue/10 text-accent-blue rounded-lg text-sm hover:bg-accent-blue/20 transition-all border border-accent-blue/20"
+        >
+          <FileDown size={16} />
+          <span>Export Report</span>
         </button>
       </div>
 
@@ -109,6 +187,74 @@ const Dashboard = () => {
           })}
         </div>
       </div>
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="glass-card w-full max-w-md p-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold">Export Dashboard Report</h3>
+              <button
+                onClick={() => setShowReportModal(false)}
+                className="p-1 hover:bg-dark-bg rounded-lg transition-all"
+              >
+                <XCircle size={20} className="text-gray-400" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="p-4 bg-dark-bg rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Shield size={16} className="text-accent-blue" />
+                  <span className="font-semibold">Report Summary</span>
+                </div>
+                <div className="space-y-1 text-sm">
+                  <p><span className="text-gray-400">Case:</span> {mockCaseData.caseId}</p>
+                  <p><span className="text-gray-400">Status:</span> <span className="text-rose-400">{mockCaseData.status}</span></p>
+                  <p><span className="text-gray-400">Total Lost:</span> ₹{mockCaseData.metrics.totalLost.toLocaleString()}</p>
+                </div>
+              </div>
+
+              {isDownloading && downloadProgress > 0 && downloadProgress < 100 && (
+                <div className="w-full">
+                  <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+                    <span>Generating report...</span>
+                    <span>{downloadProgress}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-dark-border rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-accent-blue rounded-full transition-all duration-300"
+                      style={{ width: `${downloadProgress}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={handleDownloadReport}
+                disabled={isDownloading}
+                className="w-full bg-accent-blue hover:bg-accent-blue/80 text-white font-semibold py-2 px-4 rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isDownloading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Downloading...
+                  </>
+                ) : (
+                  <>
+                    <Download size={16} />
+                    Download Report
+                  </>
+                )}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </motion.div>
   )
 }
