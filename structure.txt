@@ -1,0 +1,141 @@
+.
+├── Dockerfile
+├── INITIAL_README.md
+├── Pre-requisites
+│   ├── Architecture.png
+│   ├── Prototype pipeline.md
+│   ├── SIH2026-Investigator-Copilot .pptx
+│   ├── Untitled document-28.pdf
+│   ├── production pipeline.md
+│   └── sih blockchain presentation .pdf
+├── README.md
+├── backend
+│   ├── Dockerfile
+│   └── app
+│       ├── analytics
+│       │   ├── __init__.py
+│       │   └── fund_flow.py
+│       ├── api
+│       │   ├── __init__.py
+│       │   ├── alerts.py
+│       │   ├── analysis.py
+│       │   ├── cases.py
+│       │   ├── reports.py
+│       │   ├── transactions.py
+│       │   └── wallets.py
+│       ├── config.py
+│       ├── database
+│       │   ├── __init__.py
+│       │   ├── connection.py
+│       │   └── models.py
+│       ├── main.py
+│       ├── ml
+│       │   ├── __init__.py
+│       │   ├── features.py
+│       │   ├── isolation_forest.py
+│       │   └── xgboost_model.py
+│       ├── models
+│       │   ├── __init__.py
+│       │   ├── case.py
+│       │   ├── entity.py
+│       │   ├── evidence.py
+│       │   ├── risk.py
+│       │   └── transaction.py
+│       ├── rules
+│       │   ├── __init__.py
+│       │   └── risk_rules.py
+│       ├── schemas
+│       │   ├── __init__.py
+│       │   ├── analysis_schemas.py
+│       │   ├── case_schemas.py
+│       │   └── transaction_schemas.py
+│       └── services
+│           ├── blockchain
+│           │   ├── __init__.py
+│           │   ├── blockscout.py
+│           │   ├── etherscan.py
+│           │   └── loader.py
+│           ├── entity
+│           │   ├── __init__.py
+│           │   └── entity_matcher.py
+│           ├── evidence
+│           │   ├── __init__.py
+│           │   └── evidence_builder.py
+│           ├── graph
+│           │   ├── __init__.py
+│           │   └── graph_builder.py
+│           ├── llm
+│           │   ├── __init__.py
+│           │   ├── llama_copilot.py
+│           │   ├── mistral_reviewer.py
+│           │   ├── orchestrator.py
+│           │   └── qwen_analyst.py
+│           ├── normalization
+│           │   ├── __init__.py
+│           │   └── normalizer.py
+│           ├── patterns
+│           │   ├── __init__.py
+│           │   └── pattern_detector.py
+│           ├── reports
+│           │   ├── __init__.py
+│           │   └── report_generator.py
+│           ├── risk
+│           │   ├── __init__.py
+│           │   └── risk_engine.py
+│           └── tracing
+│               ├── __init__.py
+│               └── fund_tracer.py
+├── data
+│   ├── cases
+│   ├── entity_labels.csv
+│   └── ethereum
+├── docker-compose.yml
+├── frontend
+│   ├── Dockerfile
+│   ├── package.json
+│   ├── public
+│   │   └── index.html
+│   ├── src
+│   │   ├── App.jsx
+│   │   ├── charts
+│   │   │   └── FlowCharts.jsx
+│   │   ├── components
+│   │   │   ├── CaseForm.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── EntityMatch.jsx
+│   │   │   ├── EvidenceList.jsx
+│   │   │   ├── LLMAnalysis.jsx
+│   │   │   ├── PatternsList.jsx
+│   │   │   ├── ReportViewer.jsx
+│   │   │   ├── RiskScore.jsx
+│   │   │   └── TransactionGraph.jsx
+│   │   ├── graph
+│   │   │   └── GraphVisualization.jsx
+│   │   ├── hooks
+│   │   │   └── useInvestigation.js
+│   │   ├── main.jsx
+│   │   ├── pages
+│   │   │   ├── Home.jsx
+│   │   │   ├── Investigation.jsx
+│   │   │   └── Reports.jsx
+│   │   ├── services
+│   │   │   └── api.js
+│   │   └── types
+│   │       └── index.js
+│   ├── tailwind.config.js
+│   └── vite.config.js
+├── models
+│   ├── isolation_forest
+│   └── xgboost
+├── reports
+├── requirements.txt
+├── rules
+│   └── risk_rules.yaml
+├── setup.sh
+├── structure.txt
+└── tests
+    ├── test_api.py
+    ├── test_graph.py
+    └── test_ml.py
+
+41 directories, 98 files
