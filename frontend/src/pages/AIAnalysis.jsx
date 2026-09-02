@@ -94,6 +94,27 @@ const AIAnalysis = () => {
 
   const consensus = getConsensusLevel()
 
+  // Custom label for pie chart
+  const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name, value }) => {
+    const RADIAN = Math.PI / 180
+    const radius = outerRadius * 1.1
+    const x = cx + radius * Math.cos(-midAngle * RADIAN)
+    const y = cy + radius * Math.sin(-midAngle * RADIAN)
+    
+    return (
+      <text 
+        x={x} 
+        y={y} 
+        fill="#9CA3AF" 
+        textAnchor={x > cx ? 'start' : 'end'} 
+        dominantBaseline="central"
+        fontSize={11}
+      >
+        {`${name}: ${value}`}
+      </text>
+    )
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -165,10 +186,10 @@ const AIAnalysis = () => {
 
       {/* Confidence Distribution & Role Distribution Graphs */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Confidence Distribution */}
+        {/* Confidence Distribution - Fixed Pie Chart */}
         <div className="glass-card p-6">
           <h3 className="text-lg font-semibold mb-4">Confidence Distribution</h3>
-          <div className="w-full h-[250px]">
+          <div className="w-full h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -176,23 +197,28 @@ const AIAnalysis = () => {
                   cx="50%"
                   cy="50%"
                   labelLine={true}
-                  label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
+                  label={renderCustomLabel}
                   outerRadius={80}
                   dataKey="value"
+                  nameKey="name"
                 >
                   {confidenceDistribution.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ backgroundColor: '#0F172A', border: '1px solid #1E293B' }} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#0F172A', border: '1px solid #1E293B' }}
+                  formatter={(value, name) => [`${value} nodes`, name]}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex justify-center gap-4 mt-2">
+          <div className="flex justify-center gap-6 mt-2">
             {confidenceDistribution.map((item) => (
-              <div key={item.name} className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }}></div>
+              <div key={item.name} className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
                 <span className="text-xs text-gray-400">{item.name}</span>
+                <span className="text-xs text-gray-300 font-semibold">{item.value}</span>
               </div>
             ))}
           </div>
@@ -201,7 +227,7 @@ const AIAnalysis = () => {
         {/* Role Distribution */}
         <div className="glass-card p-6">
           <h3 className="text-lg font-semibold mb-4">Role Distribution</h3>
-          <div className="w-full h-[250px]">
+          <div className="w-full h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={roleDistribution} layout="vertical" margin={{ left: 80 }}>
                 <XAxis type="number" stroke="#6B7280" fontSize={10} />
@@ -213,7 +239,7 @@ const AIAnalysis = () => {
                   tick={{ fill: '#9CA3AF' }}
                 />
                 <Tooltip contentStyle={{ backgroundColor: '#0F172A', border: '1px solid #1E293B' }} />
-                <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                <Bar dataKey="value" radius={[0, 4, 4, 0]} label={{ position: 'right', fill: '#9CA3AF', fontSize: 12 }}>
                   {roleDistribution.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
